@@ -15,5 +15,6 @@ repository into the `custom_components/wp6003` directory.
 2. Restart Home Assistant.
   
 ## References
+- [WP6003-air-box (saso5)](https://github.com/saso5/saso5.github.io/tree/master/WP6003-air-box)
 - [xiaomi_ble](https://github.com/home-assistant/core/tree/dev/homeassistant/components/xiaomi_ble)
 - [xiaomi-ble](https://github.com/Bluetooth-Devices/xiaomi-ble.git)
