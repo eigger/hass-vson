@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import cast
-
+from functools import partial
 from .wp6003_ble import SensorDeviceClass as Wp6003SensorDeviceClass, SensorUpdate, Units
 from .wp6003_ble.const import (
     ExtendedSensorDeviceClass as Wp6003ExtendedSensorDeviceClass,
@@ -498,5 +498,5 @@ class Wp6003BluetoothSensorEntity(
 
         # remove = poll_coordinator.async_add_listener(self.async_write_ha_state)
         # self.async_on_remove(remove)
-        remove = poll_coordinator.async_add_listener(self.processor.async_handle_update)
+        remove = poll_coordinator.async_add_listener(partial(self.processor.async_handle_update, poll_coordinator.data))
         self.async_on_remove(remove)
