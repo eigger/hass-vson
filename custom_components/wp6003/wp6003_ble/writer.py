@@ -11,6 +11,7 @@ from PIL import Image
 from bleak import BleakClient, BleakError
 from bleak.backends.device import BLEDevice
 from bleak_retry_connector import establish_connection
+from .const import SERVICE_WP6003, CHAR_CMD, CHAR_NOTI
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,42 +38,44 @@ def disconnect_on_missing_services(func: WrapFuncType) -> WrapFuncType:
 
 async def get_sensor_data(
     ble_device: BLEDevice,
-) -> bool:
+) -> bytes:
     client: BleakClient | None = None
     try:
         _LOGGER.debug("connection: %s", ble_device)
         client = await establish_connection(BleakClient, ble_device, ble_device.address)
         services = client.services
-        _LOGGER.debug(f"services: {services}")
-        return True
+        for svc in services:
+            for c in svc.characteristics:
+                _LOGGER.debug(f"uuid: {svc.uuid}, char: {c}")
+
+        wp6003 = Wp6003Client(client)
+        return await wp6003.request_data()
     except Exception as e:
-        _LOGGER.error("Fail update: %s", e)
+        _LOGGER.error(f"Fail get data: {e}")
         _LOGGER.error(traceback.print_exc())
-        return False
     finally:
         if client and client.is_connected:
             await client.disconnect()
+    return None
 
 class Wp6003Client:
        
     def __init__(
         self,
-        client: BleakClient,
-        uuids: list[str],
+        client: BleakClient
     ) -> None:
         self.client = client
-        self.cmd_uuid, self.img_uuid = uuids[:2]
         self.event: Event = Event()
         self.command_data: bytes | None = None
 
     @disconnect_on_missing_services
     async def start_notify(self) -> None:
-        await self.client.start_notify(self.cmd_uuid, self._notification_handler)
+        await self.client.start_notify(CHAR_NOTI, self._notification_handler)
         await sleep(0.5)
 
     @disconnect_on_missing_services
     async def stop_notify(self) -> None:
-        await self.client.stop_notify(self.cmd_uuid)
+        await self.client.stop_notify(CHAR_NOTI)
 
     @disconnect_on_missing_services
     async def write(self, uuid: str, data: bytes) -> None:
@@ -98,4 +101,12 @@ class Wp6003Client:
         self.event.clear()
         await self.write(uuid, packet)
         return await self.read()
+    
+    #0xAB get data
+    #0xAD calibration
+    async def request_data(self) -> bytes:
+        await self.start_notify()
+        data = await self.write_with_response(CHAR_CMD, bytes([0xAB]))
+        await self.stop_notify()
+        return data
     

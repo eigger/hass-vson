@@ -390,6 +390,26 @@ SENSOR_DESCRIPTIONS = {
         native_unit_of_measurement=UnitOfVolume.LITERS,
         state_class=SensorStateClass.TOTAL,
     ),
+    # # TVOC (µg/m3)
+    # (
+    #     Wp6003SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+    #     Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    # ): SensorEntityDescription(
+    #     key=f"{Wp6003SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
+    #     device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+    #     native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    # ),
+    # HCHO (µg/m3)
+    (
+        Wp6003SensorDeviceClass.FORMALDEHYDE,
+        Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    ): SensorEntityDescription(
+        key=f"{Wp6003SensorDeviceClass.FORMALDEHYDE}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
+        device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+        native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
 }
 
 def hass_device_info(sensor_device_info):
@@ -464,3 +484,11 @@ class Wp6003BluetoothSensorEntity(
     def available(self) -> bool:
         """Return True if entity is available."""
         return super().available
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        # processor는 PassiveBluetoothProcessorDataProcessor 인스턴스,
+        # 그 안의 coordinator가 Wp6003PassiveBluetoothProcessorCoordinator 입니다.
+        poll_coordinator = self.processor.coordinator.poll_coordinator
+        remove = poll_coordinator.async_add_listener(self.async_write_ha_state)
+        self.async_on_remove(remove)

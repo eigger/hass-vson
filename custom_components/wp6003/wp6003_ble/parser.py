@@ -9,15 +9,29 @@ from home_assistant_bluetooth import BluetoothServiceInfoBleak
 from sensor_state_data import (
     SensorLibrary,
     SensorUpdate,
+    SensorDeviceClass,
+    Units,
 )
-from .const import SERVICE_WP6003, TIMEOUT_1DAY
+from sensor_state_data.description import (
+    BaseSensorDescription,
+)
+from .const import SERVICE_WP6003, TIMEOUT_1DAY, TIMEOUT_5MIN
 from .writer import get_sensor_data
+
 _LOGGER = logging.getLogger(__name__)
 
 def to_mac(addr: bytes) -> str:
     """Return formatted MAC address."""
     return ":".join(f"{i:02X}" for i in addr)
 
+TVOC__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER = BaseSensorDescription(
+    device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+    native_unit_of_measurement=Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+)
+HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER = BaseSensorDescription(
+    device_class=SensorDeviceClass.FORMALDEHYDE,
+    native_unit_of_measurement=Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+)
 class Wp6003BluetoothDeviceData(BluetoothData):
     """Data for BTHome Bluetooth devices."""
 
@@ -62,25 +76,22 @@ class Wp6003BluetoothDeviceData(BluetoothData):
         self.pending = False
         return True
     
-    def poll_needed(
-        self, service_info: BluetoothServiceInfo, last_poll: float | None
-    ) -> bool:
-        """
-        This is called every time we get a service_info for a device. It means the
-        device is working and online. If 24 hours has passed, it may be a good
-        time to poll the device.
-        """
-        if self.pending:
-            # Never need to poll if we are pending as we don't even know what
-            # kind of device we are
-            return False
-
-        return not last_poll or last_poll > TIMEOUT_1DAY
-
     async def async_poll(self, ble_device: BLEDevice) -> SensorUpdate:
         """
         Poll the device to retrieve any values we can't get from passive listening.
         """
         _LOGGER.debug("async_poll")
-        await get_sensor_data(ble_device)
+        data = await get_sensor_data(ble_device)
+        #0a0001010e02010908000065000f01000251
+        if len(data) == 18:
+            temperature = ((data[6] << 8) + data[7]) / 10
+            tvoc = ((data[10] << 8) + data[11]) / 1000
+            hcho = ((data[12] << 8) + data[13]) / 1000
+            co2 = ((data[16] << 8) + data[17])
+            
+            self.update_predefined_sensor(SensorLibrary.TEMPERATURE__CELSIUS, round(temperature, 2))
+            self.update_predefined_sensor(TVOC__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER, round(tvoc, 2))
+            self.update_predefined_sensor(HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER, round(hcho, 2))
+            self.update_predefined_sensor(SensorLibrary.CO2__CONCENTRATION_PARTS_PER_MILLION, co2)
+
         return self._finish_update()

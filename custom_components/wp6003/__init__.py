@@ -18,13 +18,14 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import DeviceRegistry
 from homeassistant.util.signal_type import SignalType
 from homeassistant.exceptions import HomeAssistantError
-
+from datetime import timedelta
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from .const import (
     CONF_DISCOVERED_EVENT_CLASSES,
     DOMAIN,
     Wp6003BleEvent,
 )
-from .coordinator import Wp6003ActiveBluetoothProcessorCoordinator
+from .coordinator import Wp6003PassiveBluetoothProcessorCoordinator
 from .types import Wp6003ConfigEntry
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.EVENT, Platform.SENSOR]
@@ -65,60 +66,46 @@ async def async_setup_entry(hass: HomeAssistant, entry: Wp6003ConfigEntry) -> bo
 
     data = Wp6003BluetoothDeviceData()
 
-    def _needs_poll(
-        service_info: BluetoothServiceInfoBleak, last_poll: float | None
-    ) -> bool:
-        # Only poll if hass is running, we need to poll,
-        # and we actually have a way to connect to the device
-        return (
-            hass.state is CoreState.running
-            and data.poll_needed(service_info, last_poll)
-            and bool(
-                async_ble_device_from_address(
-                    hass, service_info.device.address, connectable=True
-                )
-            )
-        )
-
-    async def _async_poll(service_info: BluetoothServiceInfoBleak) -> SensorUpdate:
-        # BluetoothServiceInfoBleak is defined in HA, otherwise would just pass it
-        # directly to the Xiaomi code
-        # Make sure the device we have is one that we can connect with
-        # in case its coming from a passive scanner
-        if service_info.connectable:
-            connectable_device = service_info.device
-        elif device := async_ble_device_from_address(
-            hass, service_info.device.address, True
-        ):
-            connectable_device = device
-        else:
-            # We have no bluetooth controller that is in range of
-            # the device to poll it
-            raise RuntimeError(
-                f"No connectable device found for {service_info.device.address}"
-            )
-        return await data.async_poll(connectable_device)
-    
     device_registry = dr.async_get(hass)
     event_classes = set(entry.data.get(CONF_DISCOVERED_EVENT_CLASSES, ()))
-    coordinator = Wp6003ActiveBluetoothProcessorCoordinator(
+    bt_coordinator = Wp6003PassiveBluetoothProcessorCoordinator(
         hass,
         _LOGGER,
         address=address,
         mode=BluetoothScanningMode.PASSIVE,
         update_method=partial(process_service_info, hass, entry, device_registry),
-        needs_poll_method=_needs_poll,
         device_data=data,
         discovered_event_classes=event_classes,
-        poll_method=_async_poll,
         connectable=True,
         entry=entry,
     )
-    entry.runtime_data = coordinator
+
+    async def _async_poll_data() -> SensorUpdate:
+        try:
+            device = async_ble_device_from_address(hass, address)
+            if not device:
+                raise UpdateFailed("BLE Device none")
+            sensor = await data.async_poll(device)
+            _LOGGER.debug("Update data")
+            return sensor
+        except Exception as err:
+            raise UpdateFailed(f"polling error: {err}") from err
+
+    poll_coordinator = DataUpdateCoordinator[SensorUpdate](
+        hass,
+        _LOGGER,
+        name=DOMAIN,
+        update_method=_async_poll_data,
+        update_interval=timedelta(minutes=5),
+    )
+    
+    entry.runtime_data = bt_coordinator
+    entry.runtime_data.poll_coordinator = poll_coordinator
+    await poll_coordinator.async_config_entry_first_refresh()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # only start after all platforms have had a chance to subscribe
-    entry.async_on_unload(coordinator.async_start())
+    entry.async_on_unload(bt_coordinator.async_start())
     return True
 
 
