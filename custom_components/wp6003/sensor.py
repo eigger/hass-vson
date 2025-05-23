@@ -491,12 +491,12 @@ class Wp6003BluetoothSensorEntity(
         # 그 안의 coordinator가 Wp6003PassiveBluetoothProcessorCoordinator 입니다.
         poll_coordinator = self.processor.coordinator.poll_coordinator
 
-        @callback
-        def _handle_poll_update() -> None:
-            sensor_update = poll_coordinator.data
-            self.async_write_ha_state()
+        # @callback
+        # def _handle_poll_update() -> None:
+        #     sensor_update = poll_coordinator.data
+        #     self.async_write_ha_state()
 
         # remove = poll_coordinator.async_add_listener(self.async_write_ha_state)
         # self.async_on_remove(remove)
-        remove = poll_coordinator.async_add_listener(_handle_poll_update)
+        remove = poll_coordinator.async_add_listener(self.processor.async_handle_update)
         self.async_on_remove(remove)

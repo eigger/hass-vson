@@ -86,8 +86,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: Wp6003ConfigEntry) -> bo
             if not device:
                 raise UpdateFailed("BLE Device none")
             sensor = await data.async_poll(device)
-            bt_coordinator.async_set_updated_data(sensor)
-            _LOGGER.debug("Update data")
             return sensor
         except Exception as err:
             raise UpdateFailed(f"polling error: {err}") from err
