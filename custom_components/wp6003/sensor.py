@@ -43,7 +43,7 @@ from homeassistant.const import (
     UnitOfVolume,
     UnitOfVolumeFlowRate,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.sensor import sensor_device_info_to_hass_device_info
 
@@ -490,5 +490,14 @@ class Wp6003BluetoothSensorEntity(
         # processor는 PassiveBluetoothProcessorDataProcessor 인스턴스,
         # 그 안의 coordinator가 Wp6003PassiveBluetoothProcessorCoordinator 입니다.
         poll_coordinator = self.processor.coordinator.poll_coordinator
-        remove = poll_coordinator.async_add_listener(self.async_write_ha_state)
+
+        @callback
+        def _handle_poll_update() -> None:
+            sensor_update = poll_coordinator.data
+            sensor_update_to_bluetooth_data_update(sensor_update)
+            self.async_write_ha_state()
+
+        # remove = poll_coordinator.async_add_listener(self.async_write_ha_state)
+        # self.async_on_remove(remove)
+        remove = poll_coordinator.async_add_listener(_handle_poll_update)
         self.async_on_remove(remove)

@@ -80,7 +80,7 @@ class Wp6003BluetoothDeviceData(BluetoothData):
         """
         Poll the device to retrieve any values we can't get from passive listening.
         """
-        _LOGGER.debug("async_poll")
+        self._events_updates.clear()
         data = await get_sensor_data(ble_device)
         #0a0001010e02010908000065000f01000251
         if len(data) == 18:
