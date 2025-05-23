@@ -69,8 +69,8 @@ class Wp6003BluetoothDeviceData(BluetoothData):
         manufacturer = "Vson"
 
         identifier = service_info.address.replace(":", "")[-8:]
-        self.set_title(f"{identifier}")
-        self.set_device_name(f"{identifier}")
+        self.set_title(f"{model} {identifier}")
+        self.set_device_name(f"{model} {identifier}")
         self.set_device_type(f"Air Quality Sensor")
         self.set_device_manufacturer(manufacturer)
         self.pending = False
