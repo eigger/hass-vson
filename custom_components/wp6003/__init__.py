@@ -97,7 +97,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: Wp6003ConfigEntry) -> bo
         _LOGGER,
         name=DOMAIN,
         update_method=_async_poll_data,
-        update_interval=timedelta(minutes=5),
+        update_interval=timedelta(minutes=1),
     )
     
     entry.runtime_data = bt_coordinator
