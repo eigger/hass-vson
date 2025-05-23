@@ -32,7 +32,7 @@ HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER = BaseSensorDescription(
     device_class=SensorDeviceClass.FORMALDEHYDE,
     native_unit_of_measurement=Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
 )
-class Wp6003BluetoothDeviceData(BluetoothData):
+class VsonBluetoothDeviceData(BluetoothData):
     """Data for BTHome Bluetooth devices."""
 
     def __init__(self) -> None:
@@ -56,22 +56,22 @@ class Wp6003BluetoothDeviceData(BluetoothData):
         #_LOGGER.debug(f"service_info: {service_info}")
         for uuid in service_info.service_uuids:
             if uuid == SERVICE_WP6003:
-                if self._parse_wp6003(service_info):
+                if self._parse_vson(service_info):
                     self.last_service_info = service_info
         return None
 
     def _parse_wp6003(
         self, service_info: BluetoothServiceInfoBleak
     ) -> bool:
-        """Parser for Wp6003 sensors"""
+        """Parser for Vson sensors"""
 
         model = "WP6003"
-        manufacturer = "Vson"
+        manufacturer = "Vson Technology CO., LTD"
 
         identifier = service_info.address.replace(":", "")[-8:]
         self.set_title(f"{model} {identifier}")
         self.set_device_name(f"{model} {identifier}")
-        self.set_device_type(f"Air Quality Sensor")
+        self.set_device_type(f"Air Quality Monitor")
         self.set_device_manufacturer(manufacturer)
         self.pending = False
         return True

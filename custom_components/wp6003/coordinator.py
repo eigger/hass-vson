@@ -1,10 +1,10 @@
-"""The Wp6003 Bluetooth integration."""
+"""The Vson Bluetooth integration."""
 
 from collections.abc import Callable, Coroutine
 from logging import Logger
 from typing import Any
 
-from .wp6003_ble import Wp6003BluetoothDeviceData, SensorUpdate
+from .vson_ble import VsonBluetoothDeviceData, SensorUpdate
 
 from homeassistant.components.bluetooth import (
     BluetoothScanningMode,
@@ -16,13 +16,13 @@ from homeassistant.components.bluetooth.passive_update_processor import (
 )
 from homeassistant.core import HomeAssistant
 
-from .types import Wp6003ConfigEntry
+from .types import VsonConfigEntry
 
 
-class Wp6003PassiveBluetoothProcessorCoordinator(
+class VsonPassiveBluetoothProcessorCoordinator(
     PassiveBluetoothProcessorCoordinator[SensorUpdate]
 ):
-    """Define a Wp6003 Bluetooth Passive Update Processor Coordinator."""
+    """Define a Vson Bluetooth Passive Update Processor Coordinator."""
 
     def __init__(
         self,
@@ -31,21 +31,21 @@ class Wp6003PassiveBluetoothProcessorCoordinator(
         address: str,
         mode: BluetoothScanningMode,
         update_method: Callable[[BluetoothServiceInfoBleak], SensorUpdate],
-        device_data: Wp6003BluetoothDeviceData,
+        device_data: VsonBluetoothDeviceData,
         discovered_event_classes: set[str],
-        entry: Wp6003ConfigEntry,
+        entry: VsonConfigEntry,
         connectable: bool = True,
     ) -> None:
-        """Initialize the Wp6003 Bluetooth Passive Update Processor Coordinator."""
+        """Initialize the Vson Bluetooth Passive Update Processor Coordinator."""
         super().__init__(hass, logger, address, mode, update_method, connectable)
         self.discovered_event_classes = discovered_event_classes
         self.device_data = device_data
         self.entry = entry
 
 
-class Wp6003PassiveBluetoothDataProcessor[_T](
+class VsonPassiveBluetoothDataProcessor[_T](
     PassiveBluetoothDataProcessor[_T, SensorUpdate]
 ):
-    """Define a Wp6003 Bluetooth Passive Update Data Processor."""
+    """Define a Vson Bluetooth Passive Update Data Processor."""
 
-    coordinator: Wp6003PassiveBluetoothProcessorCoordinator
+    coordinator: VsonPassiveBluetoothProcessorCoordinator

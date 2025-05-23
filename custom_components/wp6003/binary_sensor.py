@@ -1,9 +1,9 @@
-"""Support for Wp6003 binary sensors."""
+"""Support for Vson binary sensors."""
 
 from __future__ import annotations
 
-from .wp6003_ble import (
-    BinarySensorDeviceClass as Wp6003BinarySensorDeviceClass,
+from .vson_ble import (
+    BinarySensorDeviceClass as VsonBinarySensorDeviceClass,
     SensorUpdate,
 )
 
@@ -20,120 +20,120 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.sensor import sensor_device_info_to_hass_device_info
 
-from .coordinator import Wp6003PassiveBluetoothDataProcessor
+from .coordinator import VsonPassiveBluetoothDataProcessor
 from .device import device_key_to_bluetooth_entity_key
-from .types import Wp6003ConfigEntry
+from .types import VsonConfigEntry
 
 BINARY_SENSOR_DESCRIPTIONS = {
-    Wp6003BinarySensorDeviceClass.BATTERY: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.BATTERY,
+    VsonBinarySensorDeviceClass.BATTERY: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.BATTERY,
         device_class=BinarySensorDeviceClass.BATTERY,
     ),
-    Wp6003BinarySensorDeviceClass.BATTERY_CHARGING: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.BATTERY_CHARGING,
+    VsonBinarySensorDeviceClass.BATTERY_CHARGING: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.BATTERY_CHARGING,
         device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
     ),
-    Wp6003BinarySensorDeviceClass.CO: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.CO,
+    VsonBinarySensorDeviceClass.CO: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.CO,
         device_class=BinarySensorDeviceClass.CO,
     ),
-    Wp6003BinarySensorDeviceClass.COLD: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.COLD,
+    VsonBinarySensorDeviceClass.COLD: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.COLD,
         device_class=BinarySensorDeviceClass.COLD,
     ),
-    Wp6003BinarySensorDeviceClass.CONNECTIVITY: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.CONNECTIVITY,
+    VsonBinarySensorDeviceClass.CONNECTIVITY: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.CONNECTIVITY,
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
     ),
-    Wp6003BinarySensorDeviceClass.DOOR: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.DOOR,
+    VsonBinarySensorDeviceClass.DOOR: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.DOOR,
         device_class=BinarySensorDeviceClass.DOOR,
     ),
-    Wp6003BinarySensorDeviceClass.HEAT: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.HEAT,
+    VsonBinarySensorDeviceClass.HEAT: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.HEAT,
         device_class=BinarySensorDeviceClass.HEAT,
     ),
-    Wp6003BinarySensorDeviceClass.GARAGE_DOOR: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.GARAGE_DOOR,
+    VsonBinarySensorDeviceClass.GARAGE_DOOR: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.GARAGE_DOOR,
         device_class=BinarySensorDeviceClass.GARAGE_DOOR,
     ),
-    Wp6003BinarySensorDeviceClass.GAS: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.GAS,
+    VsonBinarySensorDeviceClass.GAS: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.GAS,
         device_class=BinarySensorDeviceClass.GAS,
     ),
-    Wp6003BinarySensorDeviceClass.GENERIC: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.GENERIC,
+    VsonBinarySensorDeviceClass.GENERIC: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.GENERIC,
     ),
-    Wp6003BinarySensorDeviceClass.LIGHT: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.LIGHT,
+    VsonBinarySensorDeviceClass.LIGHT: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.LIGHT,
         device_class=BinarySensorDeviceClass.LIGHT,
     ),
-    Wp6003BinarySensorDeviceClass.LOCK: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.LOCK,
+    VsonBinarySensorDeviceClass.LOCK: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.LOCK,
         device_class=BinarySensorDeviceClass.LOCK,
     ),
-    Wp6003BinarySensorDeviceClass.MOISTURE: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.MOISTURE,
+    VsonBinarySensorDeviceClass.MOISTURE: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.MOISTURE,
         device_class=BinarySensorDeviceClass.MOISTURE,
     ),
-    Wp6003BinarySensorDeviceClass.MOTION: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.MOTION,
+    VsonBinarySensorDeviceClass.MOTION: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.MOTION,
         device_class=BinarySensorDeviceClass.MOTION,
     ),
-    Wp6003BinarySensorDeviceClass.MOVING: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.MOVING,
+    VsonBinarySensorDeviceClass.MOVING: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.MOVING,
         device_class=BinarySensorDeviceClass.MOVING,
     ),
-    Wp6003BinarySensorDeviceClass.OCCUPANCY: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.OCCUPANCY,
+    VsonBinarySensorDeviceClass.OCCUPANCY: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.OCCUPANCY,
         device_class=BinarySensorDeviceClass.OCCUPANCY,
     ),
-    Wp6003BinarySensorDeviceClass.OPENING: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.OPENING,
+    VsonBinarySensorDeviceClass.OPENING: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.OPENING,
         device_class=BinarySensorDeviceClass.OPENING,
     ),
-    Wp6003BinarySensorDeviceClass.PLUG: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.PLUG,
+    VsonBinarySensorDeviceClass.PLUG: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.PLUG,
         device_class=BinarySensorDeviceClass.PLUG,
     ),
-    Wp6003BinarySensorDeviceClass.POWER: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.POWER,
+    VsonBinarySensorDeviceClass.POWER: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.POWER,
         device_class=BinarySensorDeviceClass.POWER,
     ),
-    Wp6003BinarySensorDeviceClass.PRESENCE: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.PRESENCE,
+    VsonBinarySensorDeviceClass.PRESENCE: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.PRESENCE,
         device_class=BinarySensorDeviceClass.PRESENCE,
     ),
-    Wp6003BinarySensorDeviceClass.PROBLEM: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.PROBLEM,
+    VsonBinarySensorDeviceClass.PROBLEM: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.PROBLEM,
         device_class=BinarySensorDeviceClass.PROBLEM,
     ),
-    Wp6003BinarySensorDeviceClass.RUNNING: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.RUNNING,
+    VsonBinarySensorDeviceClass.RUNNING: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.RUNNING,
         device_class=BinarySensorDeviceClass.RUNNING,
     ),
-    Wp6003BinarySensorDeviceClass.SAFETY: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.SAFETY,
+    VsonBinarySensorDeviceClass.SAFETY: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.SAFETY,
         device_class=BinarySensorDeviceClass.SAFETY,
     ),
-    Wp6003BinarySensorDeviceClass.SMOKE: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.SMOKE,
+    VsonBinarySensorDeviceClass.SMOKE: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.SMOKE,
         device_class=BinarySensorDeviceClass.SMOKE,
     ),
-    Wp6003BinarySensorDeviceClass.SOUND: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.SOUND,
+    VsonBinarySensorDeviceClass.SOUND: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.SOUND,
         device_class=BinarySensorDeviceClass.SOUND,
     ),
-    Wp6003BinarySensorDeviceClass.TAMPER: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.TAMPER,
+    VsonBinarySensorDeviceClass.TAMPER: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.TAMPER,
         device_class=BinarySensorDeviceClass.TAMPER,
     ),
-    Wp6003BinarySensorDeviceClass.VIBRATION: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.VIBRATION,
+    VsonBinarySensorDeviceClass.VIBRATION: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.VIBRATION,
         device_class=BinarySensorDeviceClass.VIBRATION,
     ),
-    Wp6003BinarySensorDeviceClass.WINDOW: BinarySensorEntityDescription(
-        key=Wp6003BinarySensorDeviceClass.WINDOW,
+    VsonBinarySensorDeviceClass.WINDOW: BinarySensorEntityDescription(
+        key=VsonBinarySensorDeviceClass.WINDOW,
         device_class=BinarySensorDeviceClass.WINDOW,
     ),
 }
@@ -168,17 +168,17 @@ def sensor_update_to_bluetooth_data_update(
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: Wp6003ConfigEntry,
+    entry: VsonConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Wp6003 BLE binary sensors."""
+    """Set up the Vson BLE binary sensors."""
     coordinator = entry.runtime_data
-    processor = Wp6003PassiveBluetoothDataProcessor(
+    processor = VsonPassiveBluetoothDataProcessor(
         sensor_update_to_bluetooth_data_update
     )
     entry.async_on_unload(
         processor.async_add_entities_listener(
-            Wp6003BluetoothBinarySensorEntity, async_add_entities
+            VsonBluetoothBinarySensorEntity, async_add_entities
         )
     )
     entry.async_on_unload(
@@ -186,11 +186,11 @@ async def async_setup_entry(
     )
 
 
-class Wp6003BluetoothBinarySensorEntity(
-    PassiveBluetoothProcessorEntity[Wp6003PassiveBluetoothDataProcessor[bool | None]],
+class VsonBluetoothBinarySensorEntity(
+    PassiveBluetoothProcessorEntity[VsonPassiveBluetoothDataProcessor[bool | None]],
     BinarySensorEntity,
 ):
-    """Representation of a Wp6003 binary sensor."""
+    """Representation of a Vson binary sensor."""
 
     @property
     def is_on(self) -> bool | None:

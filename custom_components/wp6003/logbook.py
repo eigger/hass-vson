@@ -1,4 +1,4 @@
-"""Describe wp6003 logbook events."""
+"""Describe vson logbook events."""
 
 from __future__ import annotations
 
@@ -8,25 +8,25 @@ from homeassistant.components.logbook import LOGBOOK_ENTRY_MESSAGE, LOGBOOK_ENTR
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 
-from .const import WP6003_BLE_EVENT, DOMAIN, Wp6003BleEvent
+from .const import VSON_BLE_EVENT, DOMAIN, VsonBleEvent
 
 
 @callback
 def async_describe_events(
     hass: HomeAssistant,
     async_describe_event: Callable[
-        [str, str, Callable[[Event[Wp6003BleEvent]], dict[str, str]]], None
+        [str, str, Callable[[Event[VsonBleEvent]], dict[str, str]]], None
     ],
 ) -> None:
     """Describe logbook events."""
     dev_reg = dr.async_get(hass)
 
     @callback
-    def async_describe_wp6003_event(event: Event[Wp6003BleEvent]) -> dict[str, str]:
-        """Describe wp6003 logbook event."""
+    def async_describe_vson_event(event: Event[VsonBleEvent]) -> dict[str, str]:
+        """Describe vson logbook event."""
         data = event.data
         device = dev_reg.async_get(data["device_id"])
-        name = (device and device.name) or f"Wp6003 {data['address']}"
+        name = (device and device.name) or f"Vson {data['address']}"
         if properties := data["event_properties"]:
             message = f"{data['event_class']} {data['event_type']}: {properties}"
         else:
@@ -36,4 +36,4 @@ def async_describe_events(
             LOGBOOK_ENTRY_MESSAGE: message,
         }
 
-    async_describe_event(DOMAIN, WP6003_BLE_EVENT, async_describe_wp6003_event)
+    async_describe_event(DOMAIN, VSON_BLE_EVENT, async_describe_vson_event)

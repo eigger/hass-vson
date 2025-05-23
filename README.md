@@ -1,17 +1,17 @@
-# hass-wp6003
-WP6003 BLE Sensor Home Assistant Integration
+# hass-vson
+Vson BLE Sensor Home Assistant Integration
 
 ## 💬 Feedback & Support
 
-🐞 Found a bug? Let us know via an [Issue](https://github.com/eigger/hass-wp6003/issues).  
-💡 Have a question or suggestion? Join the [Discussion](https://github.com/eigger/hass-wp6003/discussions)!
+🐞 Found a bug? Let us know via an [Issue](https://github.com/eigger/hass-vson/issues).  
+💡 Have a question or suggestion? Join the [Discussion](https://github.com/eigger/hass-vson/discussions)!
 
 ## Supported Models
 - WP6003
 
 ## Installation
 1. Install this integration with HACS (adding repository required), or copy the contents of this
-repository into the `custom_components/wp6003` directory.
+repository into the `custom_components/vson` directory.
 2. Restart Home Assistant.
   
 ## References

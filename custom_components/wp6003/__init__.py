@@ -1,11 +1,11 @@
-"""The Wp6003 Bluetooth integration."""
+"""The Vson Bluetooth integration."""
 
 from __future__ import annotations
 
 from functools import partial
 import logging
 from asyncio import sleep, Lock
-from .wp6003_ble import Wp6003BluetoothDeviceData, SensorUpdate
+from .vson_ble import VsonBluetoothDeviceData, SensorUpdate
 from homeassistant.components.bluetooth import (
     DOMAIN as BLUETOOTH_DOMAIN,
     BluetoothScanningMode,
@@ -23,10 +23,10 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .const import (
     CONF_DISCOVERED_EVENT_CLASSES,
     DOMAIN,
-    Wp6003BleEvent,
+    VsonBleEvent,
 )
-from .coordinator import Wp6003PassiveBluetoothProcessorCoordinator
-from .types import Wp6003ConfigEntry
+from .coordinator import VsonPassiveBluetoothProcessorCoordinator
+from .types import VsonConfigEntry
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.EVENT, Platform.SENSOR]
 
@@ -34,7 +34,7 @@ _LOGGER = logging.getLogger(__name__)
 
 def process_service_info(
     hass: HomeAssistant,
-    entry: Wp6003ConfigEntry,
+    entry: VsonConfigEntry,
     device_registry: DeviceRegistry,
     service_info: BluetoothServiceInfoBleak,
 ) -> SensorUpdate:
@@ -48,27 +48,27 @@ def process_service_info(
 
 def format_event_dispatcher_name(
     address: str, event_class: str
-) -> SignalType[Wp6003BleEvent]:
+) -> SignalType[VsonBleEvent]:
     """Format an event dispatcher name."""
     return SignalType(f"{DOMAIN}_event_{address}_{event_class}")
 
 
-def format_discovered_event_class(address: str) -> SignalType[str, Wp6003BleEvent]:
+def format_discovered_event_class(address: str) -> SignalType[str, VsonBleEvent]:
     """Format a discovered event class."""
     return SignalType(f"{DOMAIN}_discovered_event_class_{address}")
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: Wp6003ConfigEntry) -> bool:
-    """Set up Wp6003 Bluetooth from a config entry."""
+async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool:
+    """Set up Vson Bluetooth from a config entry."""
 
     address = entry.unique_id
     assert address is not None
 
-    data = Wp6003BluetoothDeviceData()
+    data = VsonBluetoothDeviceData()
 
     device_registry = dr.async_get(hass)
     event_classes = set(entry.data.get(CONF_DISCOVERED_EVENT_CLASSES, ()))
-    bt_coordinator = Wp6003PassiveBluetoothProcessorCoordinator(
+    bt_coordinator = VsonPassiveBluetoothProcessorCoordinator(
         hass,
         _LOGGER,
         address=address,
@@ -108,7 +108,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: Wp6003ConfigEntry) -> bo
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: Wp6003ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 

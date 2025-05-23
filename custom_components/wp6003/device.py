@@ -1,8 +1,8 @@
-"""Support for Wp6003 Bluetooth devices."""
+"""Support for Vson Bluetooth devices."""
 
 from __future__ import annotations
 
-from .wp6003_ble import DeviceKey
+from .vson_ble import DeviceKey
 
 from homeassistant.components.bluetooth.passive_update_processor import (
     PassiveBluetoothEntityKey,

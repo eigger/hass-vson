@@ -1,4 +1,4 @@
-"""Provides device triggers for Wp6003 BLE."""
+"""Provides device triggers for Vson BLE."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ from homeassistant.helpers.trigger import TriggerActionType, TriggerInfo
 from homeassistant.helpers.typing import ConfigType
 
 from .const import (
-    WP6003_BLE_EVENT,
+    VSON_BLE_EVENT,
     CONF_DISCOVERED_EVENT_CLASSES,
     CONF_SUBTYPE,
     DOMAIN,
@@ -55,7 +55,7 @@ TRIGGER_SCHEMA = DEVICE_TRIGGER_BASE_SCHEMA.extend(
 def get_event_classes_by_device_id(hass: HomeAssistant, device_id: str) -> list[str]:
     """Get the supported event classes for a device.
 
-    Events for Wp6003 BLE devices are dynamically discovered
+    Events for Vson BLE devices are dynamically discovered
     and stored in the device config entry when they are first seen.
     """
     device_registry = dr.async_get(hass)
@@ -67,10 +67,10 @@ def get_event_classes_by_device_id(hass: HomeAssistant, device_id: str) -> list[
         hass.config_entries.async_get_entry(entry_id)
         for entry_id in device.config_entries
     ]
-    wp6003_config_entry = next(
+    vson_config_entry = next(
         entry for entry in config_entries if entry and entry.domain == DOMAIN
     )
-    return wp6003_config_entry.data.get(CONF_DISCOVERED_EVENT_CLASSES, [])
+    return vson_config_entry.data.get(CONF_DISCOVERED_EVENT_CLASSES, [])
 
 
 def get_event_types_by_event_class(event_class: str) -> set[str]:
@@ -96,12 +96,12 @@ async def async_validate_trigger_config(
 
     if event_class not in event_classes:
         raise InvalidDeviceAutomationConfig(
-            f"Wp6003 trigger {event_class} is not valid for device_id '{device_id}'"
+            f"Vson trigger {event_class} is not valid for device_id '{device_id}'"
         )
 
     if event_type not in get_event_types_by_event_class(event_class):
         raise InvalidDeviceAutomationConfig(
-            f"Wp6003 trigger {event_type} is not valid for device_id '{device_id}'"
+            f"Vson trigger {event_type} is not valid for device_id '{device_id}'"
         )
 
     return config
@@ -110,7 +110,7 @@ async def async_validate_trigger_config(
 async def async_get_triggers(
     hass: HomeAssistant, device_id: str
 ) -> list[dict[str, Any]]:
-    """Return a list of triggers for Wp6003 BLE devices."""
+    """Return a list of triggers for Vson BLE devices."""
     event_classes = get_event_classes_by_device_id(hass, device_id)
     return [
         {
@@ -139,7 +139,7 @@ async def async_attach_trigger(
         event_trigger.TRIGGER_SCHEMA(
             {
                 event_trigger.CONF_PLATFORM: CONF_EVENT,
-                event_trigger.CONF_EVENT_TYPE: WP6003_BLE_EVENT,
+                event_trigger.CONF_EVENT_TYPE: VSON_BLE_EVENT,
                 event_trigger.CONF_EVENT_DATA: {
                     CONF_DEVICE_ID: config[CONF_DEVICE_ID],
                     EVENT_CLASS: config[CONF_TYPE],

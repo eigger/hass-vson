@@ -1,4 +1,4 @@
-# wp6003_ble.py
+# vson_ble.py
 
 from __future__ import annotations
 from enum import Enum
@@ -48,8 +48,8 @@ async def get_sensor_data(
             for c in svc.characteristics:
                 _LOGGER.debug(f"uuid: {svc.uuid}, char: {c}")
 
-        wp6003 = Wp6003Client(client)
-        return await wp6003.request_data()
+        vson = VsonClient(client)
+        return await vson.request_data()
     except Exception as e:
         _LOGGER.error(f"Fail get data: {e}")
         _LOGGER.error(traceback.print_exc())
@@ -58,7 +58,7 @@ async def get_sensor_data(
             await client.disconnect()
     return None
 
-class Wp6003Client:
+class VsonClient:
        
     def __init__(
         self,

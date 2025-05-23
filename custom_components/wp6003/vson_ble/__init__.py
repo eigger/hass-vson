@@ -12,13 +12,13 @@ from sensor_state_data import (
     Units,
 )
 
-from .parser import Wp6003BluetoothDeviceData
+from .parser import VsonBluetoothDeviceData
 
 __version__ = "1.0.0"
 
 __all__ = [
     "BinarySensorDeviceClass",
-    "Wp6003BluetoothDeviceData",
+    "VsonBluetoothDeviceData",
     "SensorDescription",
     "SensorDeviceClass",
     "SensorDeviceInfo",

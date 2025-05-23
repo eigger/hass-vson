@@ -1,10 +1,10 @@
-"""Constants for the Wp6003 Bluetooth integration."""
+"""Constants for the Vson Bluetooth integration."""
 
 from __future__ import annotations
 
 from typing import Final, TypedDict
 
-DOMAIN = "wp6003"
+DOMAIN = "vson"
 LOCK = "lock"
 CONF_BINDKEY: Final = "bindkey"
 CONF_DISCOVERED_EVENT_CLASSES: Final = "known_events"
@@ -13,7 +13,7 @@ CONF_SUBTYPE: Final = "subtype"
 EVENT_TYPE: Final = "event_type"
 EVENT_CLASS: Final = "event_class"
 EVENT_PROPERTIES: Final = "event_properties"
-WP6003_BLE_EVENT: Final = "wp6003_ble_event"
+VSON_BLE_EVENT: Final = "vson_ble_event"
 
 
 EVENT_CLASS_BUTTON: Final = "button"
@@ -23,8 +23,8 @@ CONF_EVENT_CLASS: Final = "event_class"
 CONF_EVENT_PROPERTIES: Final = "event_properties"
 
 
-class Wp6003BleEvent(TypedDict):
-    """Wp6003 BLE event data."""
+class VsonBleEvent(TypedDict):
+    """Vson BLE event data."""
 
     device_id: str
     address: str

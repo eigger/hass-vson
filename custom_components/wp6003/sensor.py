@@ -1,12 +1,12 @@
-"""Support for Wp6003 sensors."""
+"""Support for Vson sensors."""
 
 from __future__ import annotations
 
 from typing import cast
 from functools import partial
-from .wp6003_ble import SensorDeviceClass as Wp6003SensorDeviceClass, SensorUpdate, Units
-from .wp6003_ble.const import (
-    ExtendedSensorDeviceClass as Wp6003ExtendedSensorDeviceClass,
+from .vson_ble import SensorDeviceClass as VsonSensorDeviceClass, SensorUpdate, Units
+from .vson_ble.const import (
+    ExtendedSensorDeviceClass as VsonExtendedSensorDeviceClass,
 )
 
 from homeassistant.components.bluetooth.passive_update_processor import (
@@ -47,236 +47,236 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.sensor import sensor_device_info_to_hass_device_info
 
-from .coordinator import Wp6003PassiveBluetoothDataProcessor
+from .coordinator import VsonPassiveBluetoothDataProcessor
 from .device import device_key_to_bluetooth_entity_key
-from .types import Wp6003ConfigEntry
+from .types import VsonConfigEntry
 
 SENSOR_DESCRIPTIONS = {
     # Acceleration (m/s²)
     (
-        Wp6003SensorDeviceClass.ACCELERATION,
+        VsonSensorDeviceClass.ACCELERATION,
         Units.ACCELERATION_METERS_PER_SQUARE_SECOND,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.ACCELERATION}_{Units.ACCELERATION_METERS_PER_SQUARE_SECOND}",
+        key=f"{VsonSensorDeviceClass.ACCELERATION}_{Units.ACCELERATION_METERS_PER_SQUARE_SECOND}",
         native_unit_of_measurement=Units.ACCELERATION_METERS_PER_SQUARE_SECOND,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Battery (percent)
-    (Wp6003SensorDeviceClass.BATTERY, Units.PERCENTAGE): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.BATTERY}_{Units.PERCENTAGE}",
+    (VsonSensorDeviceClass.BATTERY, Units.PERCENTAGE): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.BATTERY}_{Units.PERCENTAGE}",
         device_class=SensorDeviceClass.BATTERY,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     # Channel (-)
-    (Wp6003ExtendedSensorDeviceClass.CHANNEL, None): SensorEntityDescription(
-        key=str(Wp6003ExtendedSensorDeviceClass.CHANNEL),
+    (VsonExtendedSensorDeviceClass.CHANNEL, None): SensorEntityDescription(
+        key=str(VsonExtendedSensorDeviceClass.CHANNEL),
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Conductivity (µS/cm)
     (
-        Wp6003SensorDeviceClass.CONDUCTIVITY,
+        VsonSensorDeviceClass.CONDUCTIVITY,
         Units.CONDUCTIVITY,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.CONDUCTIVITY}_{Units.CONDUCTIVITY}",
+        key=f"{VsonSensorDeviceClass.CONDUCTIVITY}_{Units.CONDUCTIVITY}",
         device_class=SensorDeviceClass.CONDUCTIVITY,
         native_unit_of_measurement=UnitOfConductivity.MICROSIEMENS_PER_CM,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Count (-)
-    (Wp6003SensorDeviceClass.COUNT, None): SensorEntityDescription(
-        key=str(Wp6003SensorDeviceClass.COUNT),
+    (VsonSensorDeviceClass.COUNT, None): SensorEntityDescription(
+        key=str(VsonSensorDeviceClass.COUNT),
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # CO2 (parts per million)
     (
-        Wp6003SensorDeviceClass.CO2,
+        VsonSensorDeviceClass.CO2,
         Units.CONCENTRATION_PARTS_PER_MILLION,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.CO2}_{Units.CONCENTRATION_PARTS_PER_MILLION}",
+        key=f"{VsonSensorDeviceClass.CO2}_{Units.CONCENTRATION_PARTS_PER_MILLION}",
         device_class=SensorDeviceClass.CO2,
         native_unit_of_measurement=CONCENTRATION_PARTS_PER_MILLION,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Current (Ampere)
     (
-        Wp6003SensorDeviceClass.CURRENT,
+        VsonSensorDeviceClass.CURRENT,
         Units.ELECTRIC_CURRENT_AMPERE,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.CURRENT}_{Units.ELECTRIC_CURRENT_AMPERE}",
+        key=f"{VsonSensorDeviceClass.CURRENT}_{Units.ELECTRIC_CURRENT_AMPERE}",
         device_class=SensorDeviceClass.CURRENT,
         native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Dew Point (°C)
-    (Wp6003SensorDeviceClass.DEW_POINT, Units.TEMP_CELSIUS): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.DEW_POINT}_{Units.TEMP_CELSIUS}",
+    (VsonSensorDeviceClass.DEW_POINT, Units.TEMP_CELSIUS): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.DEW_POINT}_{Units.TEMP_CELSIUS}",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Directions (°)
-    (Wp6003ExtendedSensorDeviceClass.DIRECTION, Units.DEGREE): SensorEntityDescription(
-        key=f"{Wp6003ExtendedSensorDeviceClass.DIRECTION}_{Units.DEGREE}",
+    (VsonExtendedSensorDeviceClass.DIRECTION, Units.DEGREE): SensorEntityDescription(
+        key=f"{VsonExtendedSensorDeviceClass.DIRECTION}_{Units.DEGREE}",
         native_unit_of_measurement=DEGREE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Distance (mm)
     (
-        Wp6003SensorDeviceClass.DISTANCE,
+        VsonSensorDeviceClass.DISTANCE,
         Units.LENGTH_MILLIMETERS,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.DISTANCE}_{Units.LENGTH_MILLIMETERS}",
+        key=f"{VsonSensorDeviceClass.DISTANCE}_{Units.LENGTH_MILLIMETERS}",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=UnitOfLength.MILLIMETERS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Distance (m)
-    (Wp6003SensorDeviceClass.DISTANCE, Units.LENGTH_METERS): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.DISTANCE}_{Units.LENGTH_METERS}",
+    (VsonSensorDeviceClass.DISTANCE, Units.LENGTH_METERS): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.DISTANCE}_{Units.LENGTH_METERS}",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=UnitOfLength.METERS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Duration (seconds)
-    (Wp6003SensorDeviceClass.DURATION, Units.TIME_SECONDS): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.DURATION}_{Units.TIME_SECONDS}",
+    (VsonSensorDeviceClass.DURATION, Units.TIME_SECONDS): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.DURATION}_{Units.TIME_SECONDS}",
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.SECONDS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Energy (kWh)
     (
-        Wp6003SensorDeviceClass.ENERGY,
+        VsonSensorDeviceClass.ENERGY,
         Units.ENERGY_KILO_WATT_HOUR,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.ENERGY}_{Units.ENERGY_KILO_WATT_HOUR}",
+        key=f"{VsonSensorDeviceClass.ENERGY}_{Units.ENERGY_KILO_WATT_HOUR}",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         state_class=SensorStateClass.TOTAL,
     ),
     # Gas (m3)
     (
-        Wp6003SensorDeviceClass.GAS,
+        VsonSensorDeviceClass.GAS,
         Units.VOLUME_CUBIC_METERS,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.GAS}_{Units.VOLUME_CUBIC_METERS}",
+        key=f"{VsonSensorDeviceClass.GAS}_{Units.VOLUME_CUBIC_METERS}",
         device_class=SensorDeviceClass.GAS,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
         state_class=SensorStateClass.TOTAL,
     ),
     # Gyroscope (°/s)
     (
-        Wp6003SensorDeviceClass.GYROSCOPE,
+        VsonSensorDeviceClass.GYROSCOPE,
         Units.GYROSCOPE_DEGREES_PER_SECOND,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.GYROSCOPE}_{Units.GYROSCOPE_DEGREES_PER_SECOND}",
+        key=f"{VsonSensorDeviceClass.GYROSCOPE}_{Units.GYROSCOPE_DEGREES_PER_SECOND}",
         native_unit_of_measurement=Units.GYROSCOPE_DEGREES_PER_SECOND,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Humidity in (percent)
-    (Wp6003SensorDeviceClass.HUMIDITY, Units.PERCENTAGE): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.HUMIDITY}_{Units.PERCENTAGE}",
+    (VsonSensorDeviceClass.HUMIDITY, Units.PERCENTAGE): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.HUMIDITY}_{Units.PERCENTAGE}",
         device_class=SensorDeviceClass.HUMIDITY,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Illuminance (lux)
-    (Wp6003SensorDeviceClass.ILLUMINANCE, Units.LIGHT_LUX): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.ILLUMINANCE}_{Units.LIGHT_LUX}",
+    (VsonSensorDeviceClass.ILLUMINANCE, Units.LIGHT_LUX): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.ILLUMINANCE}_{Units.LIGHT_LUX}",
         device_class=SensorDeviceClass.ILLUMINANCE,
         native_unit_of_measurement=LIGHT_LUX,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Mass sensor (kg)
-    (Wp6003SensorDeviceClass.MASS, Units.MASS_KILOGRAMS): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.MASS}_{Units.MASS_KILOGRAMS}",
+    (VsonSensorDeviceClass.MASS, Units.MASS_KILOGRAMS): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.MASS}_{Units.MASS_KILOGRAMS}",
         device_class=SensorDeviceClass.WEIGHT,
         native_unit_of_measurement=UnitOfMass.KILOGRAMS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Mass sensor (lb)
-    (Wp6003SensorDeviceClass.MASS, Units.MASS_POUNDS): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.MASS}_{Units.MASS_POUNDS}",
+    (VsonSensorDeviceClass.MASS, Units.MASS_POUNDS): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.MASS}_{Units.MASS_POUNDS}",
         device_class=SensorDeviceClass.WEIGHT,
         native_unit_of_measurement=UnitOfMass.POUNDS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Moisture (percent)
-    (Wp6003SensorDeviceClass.MOISTURE, Units.PERCENTAGE): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.MOISTURE}_{Units.PERCENTAGE}",
+    (VsonSensorDeviceClass.MOISTURE, Units.PERCENTAGE): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.MOISTURE}_{Units.PERCENTAGE}",
         device_class=SensorDeviceClass.MOISTURE,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Packet Id (-)
-    (Wp6003SensorDeviceClass.PACKET_ID, None): SensorEntityDescription(
-        key=str(Wp6003SensorDeviceClass.PACKET_ID),
+    (VsonSensorDeviceClass.PACKET_ID, None): SensorEntityDescription(
+        key=str(VsonSensorDeviceClass.PACKET_ID),
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
     ),
     # PM10 (µg/m3)
     (
-        Wp6003SensorDeviceClass.PM10,
+        VsonSensorDeviceClass.PM10,
         Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.PM10}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
+        key=f"{VsonSensorDeviceClass.PM10}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
         device_class=SensorDeviceClass.PM10,
         native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # PM2.5 (µg/m3)
     (
-        Wp6003SensorDeviceClass.PM25,
+        VsonSensorDeviceClass.PM25,
         Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.PM25}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
+        key=f"{VsonSensorDeviceClass.PM25}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
         device_class=SensorDeviceClass.PM25,
         native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Power (Watt)
-    (Wp6003SensorDeviceClass.POWER, Units.POWER_WATT): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.POWER}_{Units.POWER_WATT}",
+    (VsonSensorDeviceClass.POWER, Units.POWER_WATT): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.POWER}_{Units.POWER_WATT}",
         device_class=SensorDeviceClass.POWER,
         native_unit_of_measurement=UnitOfPower.WATT,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Precipitation (mm)
     (
-        Wp6003ExtendedSensorDeviceClass.PRECIPITATION,
+        VsonExtendedSensorDeviceClass.PRECIPITATION,
         Units.LENGTH_MILLIMETERS,
     ): SensorEntityDescription(
-        key=f"{Wp6003ExtendedSensorDeviceClass.PRECIPITATION}_{Units.LENGTH_MILLIMETERS}",
+        key=f"{VsonExtendedSensorDeviceClass.PRECIPITATION}_{Units.LENGTH_MILLIMETERS}",
         device_class=SensorDeviceClass.PRECIPITATION,
         native_unit_of_measurement=UnitOfLength.MILLIMETERS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Pressure (mbar)
-    (Wp6003SensorDeviceClass.PRESSURE, Units.PRESSURE_MBAR): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.PRESSURE}_{Units.PRESSURE_MBAR}",
+    (VsonSensorDeviceClass.PRESSURE, Units.PRESSURE_MBAR): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.PRESSURE}_{Units.PRESSURE_MBAR}",
         device_class=SensorDeviceClass.PRESSURE,
         native_unit_of_measurement=UnitOfPressure.MBAR,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Raw (-)
-    (Wp6003ExtendedSensorDeviceClass.RAW, None): SensorEntityDescription(
-        key=str(Wp6003ExtendedSensorDeviceClass.RAW),
+    (VsonExtendedSensorDeviceClass.RAW, None): SensorEntityDescription(
+        key=str(VsonExtendedSensorDeviceClass.RAW),
     ),
     # Rotation (°)
-    (Wp6003SensorDeviceClass.ROTATION, Units.DEGREE): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.ROTATION}_{Units.DEGREE}",
+    (VsonSensorDeviceClass.ROTATION, Units.DEGREE): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.ROTATION}_{Units.DEGREE}",
         native_unit_of_measurement=DEGREE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Signal Strength (RSSI) (dB)
     (
-        Wp6003SensorDeviceClass.SIGNAL_STRENGTH,
+        VsonSensorDeviceClass.SIGNAL_STRENGTH,
         Units.SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.SIGNAL_STRENGTH}_{Units.SIGNAL_STRENGTH_DECIBELS_MILLIWATT}",
+        key=f"{VsonSensorDeviceClass.SIGNAL_STRENGTH}_{Units.SIGNAL_STRENGTH_DECIBELS_MILLIWATT}",
         device_class=SensorDeviceClass.SIGNAL_STRENGTH,
         native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
         state_class=SensorStateClass.MEASUREMENT,
@@ -285,127 +285,127 @@ SENSOR_DESCRIPTIONS = {
     ),
     # Speed (m/s)
     (
-        Wp6003SensorDeviceClass.SPEED,
+        VsonSensorDeviceClass.SPEED,
         Units.SPEED_METERS_PER_SECOND,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.SPEED}_{Units.SPEED_METERS_PER_SECOND}",
+        key=f"{VsonSensorDeviceClass.SPEED}_{Units.SPEED_METERS_PER_SECOND}",
         device_class=SensorDeviceClass.SPEED,
         native_unit_of_measurement=UnitOfSpeed.METERS_PER_SECOND,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Temperature (°C)
-    (Wp6003SensorDeviceClass.TEMPERATURE, Units.TEMP_CELSIUS): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.TEMPERATURE}_{Units.TEMP_CELSIUS}",
+    (VsonSensorDeviceClass.TEMPERATURE, Units.TEMP_CELSIUS): SensorEntityDescription(
+        key=f"{VsonSensorDeviceClass.TEMPERATURE}_{Units.TEMP_CELSIUS}",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Text (-)
-    (Wp6003ExtendedSensorDeviceClass.TEXT, None): SensorEntityDescription(
-        key=str(Wp6003ExtendedSensorDeviceClass.TEXT),
+    (VsonExtendedSensorDeviceClass.TEXT, None): SensorEntityDescription(
+        key=str(VsonExtendedSensorDeviceClass.TEXT),
     ),
     # Timestamp (datetime object)
     (
-        Wp6003SensorDeviceClass.TIMESTAMP,
+        VsonSensorDeviceClass.TIMESTAMP,
         None,
     ): SensorEntityDescription(
-        key=str(Wp6003SensorDeviceClass.TIMESTAMP),
+        key=str(VsonSensorDeviceClass.TIMESTAMP),
         device_class=SensorDeviceClass.TIMESTAMP,
     ),
     # UV index (-)
     (
-        Wp6003SensorDeviceClass.UV_INDEX,
+        VsonSensorDeviceClass.UV_INDEX,
         None,
     ): SensorEntityDescription(
-        key=str(Wp6003SensorDeviceClass.UV_INDEX),
+        key=str(VsonSensorDeviceClass.UV_INDEX),
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Volatile organic Compounds (VOC) (µg/m3)
     (
-        Wp6003SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+        VsonSensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
         Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
+        key=f"{VsonSensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
         device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
         native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Voltage (volt)
     (
-        Wp6003SensorDeviceClass.VOLTAGE,
+        VsonSensorDeviceClass.VOLTAGE,
         Units.ELECTRIC_POTENTIAL_VOLT,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.VOLTAGE}_{Units.ELECTRIC_POTENTIAL_VOLT}",
+        key=f"{VsonSensorDeviceClass.VOLTAGE}_{Units.ELECTRIC_POTENTIAL_VOLT}",
         device_class=SensorDeviceClass.VOLTAGE,
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Volume (L)
     (
-        Wp6003SensorDeviceClass.VOLUME,
+        VsonSensorDeviceClass.VOLUME,
         Units.VOLUME_LITERS,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.VOLUME}_{Units.VOLUME_LITERS}",
+        key=f"{VsonSensorDeviceClass.VOLUME}_{Units.VOLUME_LITERS}",
         device_class=SensorDeviceClass.VOLUME,
         native_unit_of_measurement=UnitOfVolume.LITERS,
         state_class=SensorStateClass.TOTAL,
     ),
     # Volume (mL)
     (
-        Wp6003SensorDeviceClass.VOLUME,
+        VsonSensorDeviceClass.VOLUME,
         Units.VOLUME_MILLILITERS,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.VOLUME}_{Units.VOLUME_MILLILITERS}",
+        key=f"{VsonSensorDeviceClass.VOLUME}_{Units.VOLUME_MILLILITERS}",
         device_class=SensorDeviceClass.VOLUME,
         native_unit_of_measurement=UnitOfVolume.MILLILITERS,
         state_class=SensorStateClass.TOTAL,
     ),
     # Volume Flow Rate (m3/hour)
     (
-        Wp6003SensorDeviceClass.VOLUME_FLOW_RATE,
+        VsonSensorDeviceClass.VOLUME_FLOW_RATE,
         Units.VOLUME_FLOW_RATE_CUBIC_METERS_PER_HOUR,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.VOLUME_FLOW_RATE}_{Units.VOLUME_FLOW_RATE_CUBIC_METERS_PER_HOUR}",
+        key=f"{VsonSensorDeviceClass.VOLUME_FLOW_RATE}_{Units.VOLUME_FLOW_RATE_CUBIC_METERS_PER_HOUR}",
         device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Volume Storage (L)
     (
-        Wp6003ExtendedSensorDeviceClass.VOLUME_STORAGE,
+        VsonExtendedSensorDeviceClass.VOLUME_STORAGE,
         Units.VOLUME_LITERS,
     ): SensorEntityDescription(
-        key=f"{Wp6003ExtendedSensorDeviceClass.VOLUME_STORAGE}_{Units.VOLUME_LITERS}",
+        key=f"{VsonExtendedSensorDeviceClass.VOLUME_STORAGE}_{Units.VOLUME_LITERS}",
         device_class=SensorDeviceClass.VOLUME_STORAGE,
         native_unit_of_measurement=UnitOfVolume.LITERS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Water (L)
     (
-        Wp6003SensorDeviceClass.WATER,
+        VsonSensorDeviceClass.WATER,
         Units.VOLUME_LITERS,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.WATER}_{Units.VOLUME_LITERS}",
+        key=f"{VsonSensorDeviceClass.WATER}_{Units.VOLUME_LITERS}",
         device_class=SensorDeviceClass.WATER,
         native_unit_of_measurement=UnitOfVolume.LITERS,
         state_class=SensorStateClass.TOTAL,
     ),
     # # TVOC (µg/m3)
     # (
-    #     Wp6003SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+    #     VsonSensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
     #     Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     # ): SensorEntityDescription(
-    #     key=f"{Wp6003SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
+    #     key=f"{VsonSensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
     #     device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
     #     native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     #     state_class=SensorStateClass.MEASUREMENT,
     # ),
     # HCHO (µg/m3)
     (
-        Wp6003SensorDeviceClass.FORMALDEHYDE,
+        VsonSensorDeviceClass.FORMALDEHYDE,
         Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     ): SensorEntityDescription(
-        key=f"{Wp6003SensorDeviceClass.FORMALDEHYDE}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
+        key=f"{VsonSensorDeviceClass.FORMALDEHYDE}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
         device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
         native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         state_class=SensorStateClass.MEASUREMENT,
@@ -451,17 +451,17 @@ def sensor_update_to_bluetooth_data_update(
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: Wp6003ConfigEntry,
+    entry: VsonConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Wp6003 BLE sensors."""
+    """Set up the Vson BLE sensors."""
     coordinator = entry.runtime_data
-    processor = Wp6003PassiveBluetoothDataProcessor(
+    processor = VsonPassiveBluetoothDataProcessor(
         sensor_update_to_bluetooth_data_update
     )
     entry.async_on_unload(
         processor.async_add_entities_listener(
-            Wp6003BluetoothSensorEntity, async_add_entities
+            VsonBluetoothSensorEntity, async_add_entities
         )
     )
     entry.async_on_unload(
@@ -469,11 +469,11 @@ async def async_setup_entry(
     )
 
 
-class Wp6003BluetoothSensorEntity(
-    PassiveBluetoothProcessorEntity[Wp6003PassiveBluetoothDataProcessor[float | None]],
+class VsonBluetoothSensorEntity(
+    PassiveBluetoothProcessorEntity[VsonPassiveBluetoothDataProcessor[float | None]],
     SensorEntity,
 ):
-    """Representation of a Wp6003 BLE sensor."""
+    """Representation of a Vson BLE sensor."""
 
     @property
     def native_value(self) -> int | float | None:

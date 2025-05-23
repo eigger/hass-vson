@@ -1,4 +1,4 @@
-"""Config flow for Wp6003 Bluetooth integration."""
+"""Config flow for Vson Bluetooth integration."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from collections.abc import Mapping
 import dataclasses
 from typing import Any
 
-from .wp6003_ble import Wp6003BluetoothDeviceData as DeviceData
+from .vson_ble import VsonBluetoothDeviceData as DeviceData
 import voluptuous as vol
 
 from homeassistant.components import onboarding
@@ -33,8 +33,8 @@ def _title(discovery_info: BluetoothServiceInfoBleak, device: DeviceData) -> str
     return device.title or device.get_device_name() or discovery_info.name
 
 
-class Wp6003ConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Wp6003 Bluetooth."""
+class VsonConfigFlow(ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Vson Bluetooth."""
 
     VERSION = 1
 

@@ -1,6 +1,6 @@
 {
-  "domain": "wp6003",
-  "name": "Wp6003",
+  "domain": "vson",
+  "name": "Vson",
   "bluetooth": [
     {
       "service_uuid": "0000fff0-0000-1000-8000-00805f9b34fb",
@@ -10,8 +10,8 @@
   "codeowners": ["@eigger"],
   "config_flow": true,
   "dependencies": ["bluetooth_adapters"],
-  "documentation": "https://github.com/eigger/hass-wp6003",
-  "issue_tracker": "https://github.com/eigger/hass-wp6003/issues",
+  "documentation": "https://github.com/eigger/hass-vson",
+  "issue_tracker": "https://github.com/eigger/hass-vson/issues",
   "iot_class": "local_push",
-  "version": "1.0.3"
+  "version": "1.0.4"
 }
