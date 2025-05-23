@@ -487,16 +487,6 @@ class Wp6003BluetoothSensorEntity(
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
-        # processor는 PassiveBluetoothProcessorDataProcessor 인스턴스,
-        # 그 안의 coordinator가 Wp6003PassiveBluetoothProcessorCoordinator 입니다.
         poll_coordinator = self.processor.coordinator.poll_coordinator
-
-        # @callback
-        # def _handle_poll_update() -> None:
-        #     sensor_update = poll_coordinator.data
-        #     self.async_write_ha_state()
-
-        # remove = poll_coordinator.async_add_listener(self.async_write_ha_state)
-        # self.async_on_remove(remove)
         remove = poll_coordinator.async_add_listener(partial(self.processor.async_handle_update, poll_coordinator.data))
         self.async_on_remove(remove)
