@@ -494,7 +494,9 @@ class Wp6003BluetoothSensorEntity(
         @callback
         def _handle_poll_update() -> None:
             sensor_update = poll_coordinator.data
-            sensor_update_to_bluetooth_data_update(sensor_update)
+            update = sensor_update_to_bluetooth_data_update(sensor_update)
+
+            self.processor.async_set_updated_data(update)
             self.async_write_ha_state()
 
         # remove = poll_coordinator.async_add_listener(self.async_write_ha_state)
