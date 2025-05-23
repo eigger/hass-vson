@@ -56,7 +56,7 @@ class VsonBluetoothDeviceData(BluetoothData):
         #_LOGGER.debug(f"service_info: {service_info}")
         for uuid in service_info.service_uuids:
             if uuid == SERVICE_WP6003:
-                if self._parse_vson(service_info):
+                if self._parse_wp6003(service_info):
                     self.last_service_info = service_info
         return None
 
