@@ -7,7 +7,7 @@ WP6003 BLE Sensor Home Assistant Integration
 💡 Have a question or suggestion? Join the [Discussion](https://github.com/eigger/hass-wp6003/discussions)!
 
 ## Supported Models
-- Not yet...
+- WP6003
 
 ## Installation
 1. Install this integration with HACS (adding repository required), or copy the contents of this
