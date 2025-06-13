@@ -13,5 +13,5 @@
   "documentation": "https://github.com/eigger/hass-vson",
   "issue_tracker": "https://github.com/eigger/hass-vson/issues",
   "iot_class": "local_push",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

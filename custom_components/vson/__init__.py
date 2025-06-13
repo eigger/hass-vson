@@ -60,11 +60,15 @@ def format_discovered_event_class(address: str) -> SignalType[str, VsonBleEvent]
 
 async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool:
     """Set up Vson Bluetooth from a config entry."""
-
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
     address = entry.unique_id
     assert address is not None
 
     data = VsonBluetoothDeviceData()
+    hass.data[DOMAIN][entry.entry_id] = {}
+    hass.data[DOMAIN][entry.entry_id]['address'] = address
+    hass.data[DOMAIN][entry.entry_id]['data'] = data
 
     device_registry = dr.async_get(hass)
     event_classes = set(entry.data.get(CONF_DISCOVERED_EVENT_CLASSES, ()))
@@ -80,13 +84,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
         entry=entry,
     )
 
-    async def _async_poll_data() -> SensorUpdate:
+    async def _async_poll_data(hass: HomeAssistant, entry: VsonConfigEntry) -> SensorUpdate:
         try:
-            device = async_ble_device_from_address(hass, address)
+            device = async_ble_device_from_address(hass, hass.data[DOMAIN][entry.entry_id]['address'])
             if not device:
                 raise UpdateFailed("BLE Device none")
-            sensor = await data.async_poll(device)
-            return sensor
+            coordinator = entry.runtime_data
+            return await coordinator.device_data.async_poll(device)
         except Exception as err:
             raise UpdateFailed(f"polling error: {err}") from err
 
@@ -94,7 +98,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
         hass,
         _LOGGER,
         name=DOMAIN,
-        update_method=_async_poll_data,
+        update_method=partial(_async_poll_data, hass, entry),
         update_interval=timedelta(minutes=5),
     )
     
