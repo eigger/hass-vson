@@ -68,7 +68,7 @@ class VsonBluetoothDeviceData(BluetoothData):
         model = "WP6003"
         manufacturer = "Vson Technology CO., LTD"
 
-        identifier = service_info.address.replace(":", "")[-8:]
+        identifier = service_info.address.replace(":", "")[-4:]
         self.set_title(f"{model} {identifier}")
         self.set_device_name(f"{model} {identifier}")
         self.set_device_type(f"Air Quality Monitor")
