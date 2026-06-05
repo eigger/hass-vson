@@ -4,31 +4,24 @@ from __future__ import annotations
 
 from functools import partial
 import logging
-from asyncio import sleep, Lock
 from .vson_ble import VsonBluetoothDeviceData, SensorUpdate
 from homeassistant.components.bluetooth import (
-    DOMAIN as BLUETOOTH_DOMAIN,
     BluetoothScanningMode,
     BluetoothServiceInfoBleak,
     async_ble_device_from_address,
 )
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, CoreState
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import DeviceRegistry
-from homeassistant.util.signal_type import SignalType
-from homeassistant.exceptions import HomeAssistantError
 from datetime import timedelta
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from .const import (
-    CONF_DISCOVERED_EVENT_CLASSES,
-    DOMAIN,
-    VsonBleEvent,
-)
+from .ble_session import vson_poll_ble_telemetry
+from .const import DOMAIN
 from .coordinator import VsonPassiveBluetoothProcessorCoordinator
 from .types import VsonConfigEntry
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.EVENT, Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,18 +39,6 @@ def process_service_info(
     return update
 
 
-def format_event_dispatcher_name(
-    address: str, event_class: str
-) -> SignalType[VsonBleEvent]:
-    """Format an event dispatcher name."""
-    return SignalType(f"{DOMAIN}_event_{address}_{event_class}")
-
-
-def format_discovered_event_class(address: str) -> SignalType[str, VsonBleEvent]:
-    """Format a discovered event class."""
-    return SignalType(f"{DOMAIN}_discovered_event_class_{address}")
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool:
     """Set up Vson Bluetooth from a config entry."""
     if DOMAIN not in hass.data:
@@ -71,7 +52,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
     hass.data[DOMAIN][entry.entry_id]['data'] = data
 
     device_registry = dr.async_get(hass)
-    event_classes = set(entry.data.get(CONF_DISCOVERED_EVENT_CLASSES, ()))
     bt_coordinator = VsonPassiveBluetoothProcessorCoordinator(
         hass,
         _LOGGER,
@@ -79,10 +59,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
         mode=BluetoothScanningMode.PASSIVE,
         update_method=partial(process_service_info, hass, entry, device_registry),
         device_data=data,
-        discovered_event_classes=event_classes,
         connectable=True,
         entry=entry,
     )
+
+    connection_coordinator = DataUpdateCoordinator[bool](
+        hass,
+        _LOGGER,
+        name=f"{DOMAIN}_connection_{address}",
+    )
+    duration_coordinator = DataUpdateCoordinator[float | None](
+        hass,
+        _LOGGER,
+        name=f"{DOMAIN}_duration_{address}",
+    )
+    connection_coordinator.async_set_updated_data(False)
+    duration_coordinator.async_set_updated_data(None)
+    hass.data[DOMAIN][entry.entry_id]["connection_coordinator"] = connection_coordinator
+    hass.data[DOMAIN][entry.entry_id]["duration_coordinator"] = duration_coordinator
 
     async def _async_poll_data(hass: HomeAssistant, entry: VsonConfigEntry) -> SensorUpdate:
         try:
@@ -90,7 +84,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
             if not device:
                 raise UpdateFailed("BLE Device none")
             coordinator = entry.runtime_data
-            return await coordinator.device_data.async_poll(device)
+            entry_data = hass.data[DOMAIN][entry.entry_id]
+            async with vson_poll_ble_telemetry(entry_data):
+                return await coordinator.device_data.async_poll(device)
         except Exception as err:
             raise UpdateFailed(f"polling error: {err}") from err
 
@@ -104,7 +100,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
     
     entry.runtime_data = bt_coordinator
     entry.runtime_data.poll_coordinator = poll_coordinator
-    await poll_coordinator.async_config_entry_first_refresh()
+    # Don't block setup if the first poll fails (BLE device may be momentarily
+    # unreachable). Entities load and recover on the next successful poll.
+    await poll_coordinator.async_refresh()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # only start after all platforms have had a chance to subscribe
@@ -115,20 +113,3 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
 async def async_unload_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-
-async def get_entry_id_from_device(hass, device_id: str) -> str:
-    device_reg = dr.async_get(hass)
-    device_entry = device_reg.async_get(device_id)
-    if not device_entry:
-        raise ValueError(f"Unknown device_id: {device_id}")
-    if not device_entry.config_entries:
-        raise ValueError(f"No config entries for device {device_id}")
-
-    _LOGGER.debug(f"{device_id} to {device_entry.config_entries}")
-    try:
-        entry_id = next(iter(device_entry.config_entries))
-    except StopIteration:
-        _LOGGER.error("%s None", device_id)
-        return None
-
-    return entry_id

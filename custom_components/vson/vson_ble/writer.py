@@ -1,17 +1,14 @@
 # vson_ble.py
 
 from __future__ import annotations
-from enum import Enum
 import logging
-import struct
 import traceback
 from typing import Any, Callable, TypeVar
 from asyncio import Event, wait_for, sleep
-from PIL import Image
 from bleak import BleakClient, BleakError
 from bleak.backends.device import BLEDevice
 from bleak_retry_connector import establish_connection
-from .const import SERVICE_WP6003, CHAR_CMD, CHAR_NOTI
+from .const import CHAR_CMD, CHAR_NOTI
 
 _LOGGER = logging.getLogger(__name__)
 

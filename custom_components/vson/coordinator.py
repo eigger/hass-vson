@@ -1,8 +1,7 @@
 """The Vson Bluetooth integration."""
 
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable
 from logging import Logger
-from typing import Any
 
 from .vson_ble import VsonBluetoothDeviceData, SensorUpdate
 
@@ -32,13 +31,11 @@ class VsonPassiveBluetoothProcessorCoordinator(
         mode: BluetoothScanningMode,
         update_method: Callable[[BluetoothServiceInfoBleak], SensorUpdate],
         device_data: VsonBluetoothDeviceData,
-        discovered_event_classes: set[str],
         entry: VsonConfigEntry,
         connectable: bool = True,
     ) -> None:
         """Initialize the Vson Bluetooth Passive Update Processor Coordinator."""
         super().__init__(hass, logger, address, mode, update_method, connectable)
-        self.discovered_event_classes = discovered_event_classes
         self.device_data = device_data
         self.entry = entry
 
