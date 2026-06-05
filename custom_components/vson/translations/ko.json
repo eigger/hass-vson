@@ -1,0 +1,34 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "description": "설정할 기기를 선택하세요.",
+        "data": {
+          "address": "기기"
+        }
+      },
+      "bluetooth_confirm": {
+        "description": "{name} 기기를 설정하시겠습니까?"
+      }
+    },
+    "abort": {
+      "not_supported": "지원하지 않는 기기입니다",
+      "no_devices_found": "설정 가능한 기기를 찾을 수 없습니다",
+      "already_in_progress": "구성이 이미 진행 중입니다",
+      "already_configured": "기기가 이미 구성되어 있습니다"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "poll_duration": {
+        "name": "폴링 시간"
+      }
+    },
+    "binary_sensor": {
+      "connection": {
+        "name": "연결"
+      }
+    }
+  }
+}
