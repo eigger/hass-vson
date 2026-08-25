@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 from home_assistant_bluetooth import BluetoothServiceInfoBleak
-from sensor_state_data import SensorLibrary, Units
+from sensor_state_data import Units
 
 from custom_components.vson.vson_ble.const import SERVICE_WP6003
 from custom_components.vson.vson_ble.parser import (
