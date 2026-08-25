@@ -19,6 +19,16 @@
       "already_configured": "Device is already configured"
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Configure polling settings.",
+        "data": {
+          "scan_interval": "Polling interval (seconds)"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "poll_duration": {

@@ -17,7 +17,7 @@ from homeassistant.helpers.device_registry import DeviceRegistry
 from datetime import timedelta
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from .ble_session import vson_poll_ble_telemetry
-from .const import DOMAIN
+from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .coordinator import VsonPassiveBluetoothProcessorCoordinator
 from .types import VsonConfigEntry
 
@@ -91,13 +91,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
             coordinator.async_set_updated_data(update)
             return update
 
+    scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     poll_coordinator = DataUpdateCoordinator[SensorUpdate](
         hass,
         _LOGGER,
         config_entry=entry,
         name=DOMAIN,
         update_method=partial(_async_poll_data, hass, entry),
-        update_interval=timedelta(minutes=5),
+        update_interval=timedelta(seconds=scan_interval),
     )
     
     entry.runtime_data = bt_coordinator
@@ -110,10 +111,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
     # Keep a listener registered on poll_coordinator so DataUpdateCoordinator schedules periodic refreshes
     entry.async_on_unload(poll_coordinator.async_add_listener(lambda: None))
 
+    # Reload entry when options change
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
     # Don't block setup if the first poll fails (BLE device may be momentarily
     # unreachable). Entities load and recover on the next successful poll.
     await poll_coordinator.async_refresh()
     return True
+
+
+async def async_reload_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> None:
+    """Reload config entry when options change."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool:

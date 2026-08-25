@@ -19,6 +19,16 @@
       "already_configured": "기기가 이미 구성되어 있습니다"
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "description": "폴링 설정을 구성합니다.",
+        "data": {
+          "scan_interval": "폴링 주기(초)"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "poll_duration": {
