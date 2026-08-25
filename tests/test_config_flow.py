@@ -22,7 +22,6 @@ def test_async_get_options_flow():
 
     options_flow = VsonConfigFlow.async_get_options_flow(config_entry)
     assert isinstance(options_flow, VsonOptionsFlowHandler)
-    assert options_flow.config_entry == config_entry
 
 
 @pytest.mark.asyncio
@@ -31,7 +30,8 @@ async def test_options_flow_init_form():
     config_entry = MagicMock()
     config_entry.options = {}
 
-    handler = VsonOptionsFlowHandler(config_entry)
+    handler = VsonOptionsFlowHandler()
+    handler._config_entry = config_entry
     handler.async_show_form = MagicMock(return_value={"type": "form", "step_id": "init"})
 
     result = await handler.async_step_init()
@@ -46,7 +46,8 @@ async def test_options_flow_init_save():
     config_entry = MagicMock()
     config_entry.options = {CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL}
 
-    handler = VsonOptionsFlowHandler(config_entry)
+    handler = VsonOptionsFlowHandler()
+    handler._config_entry = config_entry
     handler.async_create_entry = MagicMock(
         side_effect=lambda title, data: {"type": "create_entry", "title": title, "data": data}
     )

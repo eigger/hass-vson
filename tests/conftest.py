@@ -211,7 +211,11 @@ class MockConfigFlow(MockBase):
 
 
 class MockOptionsFlow(MockBase):
-    pass
+    _config_entry = None
+
+    @property
+    def config_entry(self):
+        return self._config_entry
 
 
 class MockConfigEntry(MockBase):

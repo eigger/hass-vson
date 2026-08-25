@@ -61,7 +61,7 @@ class VsonConfigFlow(ConfigFlow, domain=DOMAIN):
         config_entry: ConfigEntry,
     ) -> OptionsFlow:
         """Create the options flow."""
-        return VsonOptionsFlowHandler(config_entry)
+        return VsonOptionsFlowHandler()
 
     async def async_step_bluetooth(
         self, discovery_info: BluetoothServiceInfoBleak
@@ -145,10 +145,6 @@ class VsonConfigFlow(ConfigFlow, domain=DOMAIN):
 
 class VsonOptionsFlowHandler(OptionsFlow):
     """Handle options flow for Vson."""
-
-    def __init__(self, config_entry: ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
