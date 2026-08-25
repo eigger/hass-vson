@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install pytest bleak bleak-retry-connector bluetooth-sensor-state-data home-assistant-bluetooth sensor-state-data
+          pip install pytest pytest-asyncio bleak bleak-retry-connector bluetooth-sensor-state-data home-assistant-bluetooth sensor-state-data
 
       - name: Run tests
         run: python -m pytest tests/ -v

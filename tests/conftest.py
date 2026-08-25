@@ -42,9 +42,13 @@ class MockPassiveDataProcessor(MockBase):
     pass
 
 
+class MockPassiveProcessorEntity(MockBase):
+    pass
+
+
 ha_bt_processor = MagicMock()
 ha_bt_processor.PassiveBluetoothProcessorCoordinator = MockPassiveCoordinator
-ha_bt_processor.PassiveBluetoothProcessorEntity = MockBase
+ha_bt_processor.PassiveBluetoothProcessorEntity = MockPassiveProcessorEntity
 ha_bt_processor.PassiveBluetoothDataProcessor = MockPassiveDataProcessor
 
 
