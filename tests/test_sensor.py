@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock
+import pytest
 from homeassistant.const import (
     UnitOfDensity,
     UnitOfRatio,
@@ -10,6 +11,7 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
+from custom_components.vson.binary_sensor import VsonConnectionBinarySensorEntity
 from custom_components.vson.vson_ble import SensorDeviceClass as VsonSensorDeviceClass, Units
 from custom_components.vson.sensor import (
     SENSOR_DESCRIPTIONS,
@@ -72,4 +74,43 @@ def test_sensor_update_to_bluetooth_data_update_none():
     assert data_update is not None
     assert data_update.devices == {}
     assert data_update.entity_descriptions == {}
+
+
+def test_connection_binary_sensor_entity():
+    """Test diagnostic connection binary sensor entity."""
+    coordinator = MagicMock()
+    coordinator.data = True
+
+    entity = VsonConnectionBinarySensorEntity("AA:BB:CC:DD:EE:FF", coordinator)
+    assert entity.is_on is True
+    assert entity.icon == "mdi:bluetooth-connect"
+    assert entity._attr_unique_id == "AA:BB:CC:DD:EE:FF_connection"
+
+    coordinator.data = False
+    assert entity.is_on is False
+    assert entity.icon == "mdi:bluetooth-off"
+
+
+@pytest.mark.asyncio
+async def test_ble_telemetry_lifecycle():
+    """Test vson_poll_ble_telemetry context manager lifecycle."""
+    from custom_components.vson.ble_session import vson_poll_ble_telemetry
+
+    conn_coord = MagicMock()
+    dur_coord = MagicMock()
+    entry_data = {
+        "connection_coordinator": conn_coord,
+        "duration_coordinator": dur_coord,
+    }
+
+    async with vson_poll_ble_telemetry(entry_data):
+        conn_coord.async_set_updated_data.assert_called_with(True)
+        dur_coord.async_set_updated_data.assert_called_with(0.0)
+
+    # After exit, connection should be False and duration should have been finalized
+    assert conn_coord.async_set_updated_data.call_args_list[-1][0][0] is False
+    last_dur = dur_coord.async_set_updated_data.call_args_list[-1][0][0]
+    assert isinstance(last_dur, float)
+    assert last_dur >= 0.0
+
 

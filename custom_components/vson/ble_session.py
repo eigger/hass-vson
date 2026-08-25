@@ -18,9 +18,9 @@ async def vson_poll_ble_telemetry(entry_data: dict) -> AsyncIterator[None]:
 
     async def _duration_ticker() -> None:
         while True:
+            await asyncio.sleep(1)
             elapsed_tick = round(perf_counter() - started, 3)
             duration_coordinator.async_set_updated_data(elapsed_tick)
-            await asyncio.sleep(1)
 
     connection_coordinator.async_set_updated_data(True)
     duration_coordinator.async_set_updated_data(0.0)

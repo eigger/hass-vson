@@ -79,22 +79,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
     hass.data[DOMAIN][entry.entry_id]["duration_coordinator"] = duration_coordinator
 
     async def _async_poll_data(hass: HomeAssistant, entry: VsonConfigEntry) -> SensorUpdate:
-        try:
-            device = async_ble_device_from_address(hass, hass.data[DOMAIN][entry.entry_id]['address'])
+        entry_data = hass.data[DOMAIN][entry.entry_id]
+        async with vson_poll_ble_telemetry(entry_data):
+            device = async_ble_device_from_address(hass, entry_data["address"])
             if not device:
-                raise UpdateFailed("BLE Device none")
+                raise UpdateFailed("BLE Device not found")
             coordinator: VsonPassiveBluetoothProcessorCoordinator = entry.runtime_data
-            entry_data = hass.data[DOMAIN][entry.entry_id]
-            async with vson_poll_ble_telemetry(entry_data):
-                update = await coordinator.device_data.async_poll(device)
+            update = await coordinator.device_data.async_poll(device)
+            if not update or not update.entity_values:
+                raise UpdateFailed("No sensor data received from BLE device")
             coordinator.async_set_updated_data(update)
             return update
-        except Exception as err:
-            raise UpdateFailed(f"polling error: {err}") from err
 
     poll_coordinator = DataUpdateCoordinator[SensorUpdate](
         hass,
         _LOGGER,
+        config_entry=entry,
         name=DOMAIN,
         update_method=partial(_async_poll_data, hass, entry),
         update_interval=timedelta(minutes=5),
@@ -107,6 +107,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
     # only start after all platforms have had a chance to subscribe
     entry.async_on_unload(bt_coordinator.async_start())
 
+    # Keep a listener registered on poll_coordinator so DataUpdateCoordinator schedules periodic refreshes
+    entry.async_on_unload(poll_coordinator.async_add_listener(lambda: None))
+
     # Don't block setup if the first poll fails (BLE device may be momentarily
     # unreachable). Entities load and recover on the next successful poll.
     await poll_coordinator.async_refresh()
@@ -115,4 +118,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
 
 async def async_unload_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool:
     """Unload a config entry."""
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+    return unload_ok

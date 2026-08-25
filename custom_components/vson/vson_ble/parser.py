@@ -70,7 +70,7 @@ class VsonBluetoothDeviceData(BluetoothData):
         self._sensor_descriptions_updates.clear()
         data = await get_sensor_data(ble_device)
         #0a0001010e02010908000065000f01000251
-        if len(data) == 18:
+        if data and len(data) == 18:
             temperature = ((data[6] << 8) + data[7]) / 10
             tvoc = ((data[10] << 8) + data[11]) / 1000
             hcho = ((data[12] << 8) + data[13]) / 1000

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 import logging
-import traceback
 from typing import Any, Callable, TypeVar
 from asyncio import Event, wait_for, sleep
 from bleak import BleakClient, BleakError
@@ -35,7 +34,7 @@ def disconnect_on_missing_services(func: WrapFuncType) -> WrapFuncType:
 
 async def get_sensor_data(
     ble_device: BLEDevice,
-) -> bytes:
+) -> bytes | None:
     client: BleakClient | None = None
     try:
         _LOGGER.debug("connection: %s", ble_device)
@@ -48,8 +47,7 @@ async def get_sensor_data(
         vson = VsonClient(client)
         return await vson.request_data()
     except Exception as e:
-        _LOGGER.error(f"Fail get data: {e}")
-        _LOGGER.error(traceback.print_exc())
+        _LOGGER.error("Fail get data: %s", e, exc_info=True)
     finally:
         if client and client.is_connected:
             await client.disconnect()
