@@ -83,7 +83,7 @@ class VsonClient:
             await sleep(0.05)
 
     def _notification_handler(self, _: Any, data: bytearray) -> None:
-        if self.command_data == None:
+        if self.command_data is None:
             self.command_data = bytes(data)
             self.event.set()
 
