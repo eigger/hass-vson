@@ -64,3 +64,12 @@ def test_sensor_update_to_bluetooth_data_update():
     assert data_update is not None
     assert data_update.devices == {}
     assert data_update.entity_descriptions == {}
+
+
+def test_sensor_update_to_bluetooth_data_update_none():
+    """Test sensor_update_to_bluetooth_data_update with None argument."""
+    data_update = sensor_update_to_bluetooth_data_update(None)
+    assert data_update is not None
+    assert data_update.devices == {}
+    assert data_update.entity_descriptions == {}
+

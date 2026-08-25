@@ -83,10 +83,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
             device = async_ble_device_from_address(hass, hass.data[DOMAIN][entry.entry_id]['address'])
             if not device:
                 raise UpdateFailed("BLE Device none")
-            coordinator = entry.runtime_data
+            coordinator: VsonPassiveBluetoothProcessorCoordinator = entry.runtime_data
             entry_data = hass.data[DOMAIN][entry.entry_id]
             async with vson_poll_ble_telemetry(entry_data):
-                return await coordinator.device_data.async_poll(device)
+                update = await coordinator.device_data.async_poll(device)
+            coordinator.async_set_updated_data(update)
+            return update
         except Exception as err:
             raise UpdateFailed(f"polling error: {err}") from err
 
@@ -100,13 +102,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
     
     entry.runtime_data = bt_coordinator
     entry.runtime_data.poll_coordinator = poll_coordinator
-    # Don't block setup if the first poll fails (BLE device may be momentarily
-    # unreachable). Entities load and recover on the next successful poll.
-    await poll_coordinator.async_refresh()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # only start after all platforms have had a chance to subscribe
     entry.async_on_unload(bt_coordinator.async_start())
+
+    # Don't block setup if the first poll fails (BLE device may be momentarily
+    # unreachable). Entities load and recover on the next successful poll.
+    await poll_coordinator.async_refresh()
     return True
 
 

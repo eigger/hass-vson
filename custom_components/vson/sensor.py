@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import cast
-from functools import partial
 from .vson_ble import SensorDeviceClass as VsonSensorDeviceClass, SensorUpdate, Units
 
 from homeassistant.components.bluetooth.passive_update_processor import (
@@ -88,9 +87,12 @@ def hass_device_info(sensor_device_info):
     return device_info
 
 def sensor_update_to_bluetooth_data_update(
-    sensor_update: SensorUpdate,
+    sensor_update: SensorUpdate | None,
 ) -> PassiveBluetoothDataUpdate[float | None]:
     """Convert a sensor update to a bluetooth data update."""
+    if not sensor_update:
+        return PassiveBluetoothDataUpdate()
+
     entity_descriptions: dict = {}
     for device_key, description in sensor_update.entity_descriptions.items():
         if not description.device_class:
@@ -164,12 +166,6 @@ class VsonBluetoothSensorEntity(
     def available(self) -> bool:
         """Return True if entity is available."""
         return super().available
-
-    async def async_added_to_hass(self) -> None:
-        await super().async_added_to_hass()
-        poll_coordinator = self.processor.coordinator.poll_coordinator
-        remove = poll_coordinator.async_add_listener(partial(self.processor.async_handle_update, poll_coordinator.data))
-        self.async_on_remove(remove)
 
 
 class VsonPollDurationSensorEntity(

@@ -63,6 +63,16 @@ class MockPassiveBluetoothDataUpdate:
     entity_data: dict = None
     entity_names: dict = None
 
+    def __post_init__(self):
+        if self.devices is None:
+            self.devices = {}
+        if self.entity_descriptions is None:
+            self.entity_descriptions = {}
+        if self.entity_data is None:
+            self.entity_data = {}
+        if self.entity_names is None:
+            self.entity_names = {}
+
 
 ha_bt_processor.PassiveBluetoothDataUpdate = MockPassiveBluetoothDataUpdate
 sys.modules["homeassistant.components.bluetooth.passive_update_processor"] = (

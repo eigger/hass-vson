@@ -39,6 +39,8 @@ class VsonBluetoothDeviceData(BluetoothData):
 
     def _start_update(self, service_info: BluetoothServiceInfoBleak) -> None:
         """Update from BLE advertisement data."""
+        self._sensor_values_updates.clear()
+        self._sensor_descriptions_updates.clear()
         for uuid in service_info.service_uuids:
             if uuid == SERVICE_WP6003:
                 self._parse_wp6003(service_info)
@@ -64,6 +66,8 @@ class VsonBluetoothDeviceData(BluetoothData):
         Poll the device to retrieve any values we can't get from passive listening.
         """
         self._events_updates.clear()
+        self._sensor_values_updates.clear()
+        self._sensor_descriptions_updates.clear()
         data = await get_sensor_data(ble_device)
         #0a0001010e02010908000065000f01000251
         if len(data) == 18:
