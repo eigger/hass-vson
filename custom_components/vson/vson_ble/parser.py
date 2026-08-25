@@ -55,7 +55,7 @@ class VsonBluetoothDeviceData(BluetoothData):
         identifier = service_info.address.replace(":", "")[-4:]
         self.set_title(f"{model} {identifier}")
         self.set_device_name(f"{model} {identifier}")
-        self.set_device_type(f"Air Quality Monitor")
+        self.set_device_type("Air Quality Monitor")
         self.set_device_manufacturer(manufacturer)
         return True
     

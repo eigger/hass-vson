@@ -12,7 +12,7 @@
   "config_flow": true,
   "dependencies": ["bluetooth_adapters"],
   "documentation": "https://github.com/eigger/hass-vson",
-  "issue_tracker": "https://github.com/eigger/hass-vson/issues",
   "iot_class": "local_push",
-  "version": "1.1.0"
+  "issue_tracker": "https://github.com/eigger/hass-vson/issues",
+  "version": "1.1.1"
 }

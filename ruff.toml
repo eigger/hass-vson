@@ -1,0 +1,4 @@
+# Ruff configuration.
+[lint]
+select = ["E", "F"]
+ignore = ["E501"]
