@@ -19,9 +19,9 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     ATTR_SW_VERSION,
     ATTR_HW_VERSION,
-    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-    CONCENTRATION_PARTS_PER_MILLION,
     EntityCategory,
+    UnitOfDensity,
+    UnitOfRatio,
     UnitOfTemperature,
     UnitOfTime,
 )
@@ -47,7 +47,7 @@ SENSOR_DESCRIPTIONS = {
     ): SensorEntityDescription(
         key=f"{VsonSensorDeviceClass.CO2}_{Units.CONCENTRATION_PARTS_PER_MILLION}",
         device_class=SensorDeviceClass.CO2,
-        native_unit_of_measurement=CONCENTRATION_PARTS_PER_MILLION,
+        native_unit_of_measurement=UnitOfRatio.PARTS_PER_MILLION,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # Temperature (°C)
@@ -64,7 +64,7 @@ SENSOR_DESCRIPTIONS = {
     ): SensorEntityDescription(
         key=f"{VsonSensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
         device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
-        native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        native_unit_of_measurement=UnitOfDensity.MICROGRAMS_PER_CUBIC_METER,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     # HCHO (µg/m3)
@@ -74,7 +74,7 @@ SENSOR_DESCRIPTIONS = {
     ): SensorEntityDescription(
         key=f"{VsonSensorDeviceClass.FORMALDEHYDE}_{Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER}",
         device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
-        native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        native_unit_of_measurement=UnitOfDensity.MICROGRAMS_PER_CUBIC_METER,
         state_class=SensorStateClass.MEASUREMENT,
     ),
 }
