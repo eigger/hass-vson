@@ -28,6 +28,10 @@ ha_exceptions = MagicMock()
 ha_exceptions.HomeAssistantError = MockHomeAssistantError
 sys.modules["homeassistant.exceptions"] = ha_exceptions
 
+# Mock voluptuous if not present
+if "voluptuous" not in sys.modules:
+    sys.modules["voluptuous"] = MagicMock()
+
 # Mock Home Assistant core and submodules
 sys.modules["homeassistant"] = MagicMock()
 sys.modules["homeassistant.components"] = MagicMock()
@@ -75,6 +79,10 @@ class MockBinarySensorEntity(MockBase):
 
 
 class MockCoordinatorEntity(MockBase):
+    def __init__(self, coordinator=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.coordinator = coordinator
+
     @property
     def available(self) -> bool:
         coord = getattr(self, "coordinator", None)
@@ -122,6 +130,7 @@ sys.modules["homeassistant.components.sensor"] = ha_sensor
 
 
 class BinarySensorDeviceClass(StrEnum):
+    CONNECTIVITY = "connectivity"
     PROBLEM = "problem"
 
 

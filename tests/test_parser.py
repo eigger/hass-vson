@@ -5,6 +5,8 @@ from __future__ import annotations
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from bleak.backends.device import BLEDevice
+from bleak.backends.scanner import AdvertisementData
 from home_assistant_bluetooth import BluetoothServiceInfoBleak
 from sensor_state_data import SensorLibrary, Units
 
@@ -22,18 +24,19 @@ def _make_service_info(
     service_uuids: list[str] | None = None,
 ) -> BluetoothServiceInfoBleak:
     """Helper to create a BluetoothServiceInfoBleak instance."""
-    return BluetoothServiceInfoBleak(
-        name=name,
-        address=address,
-        rssi=-60,
+    uuids = service_uuids if service_uuids is not None else [SERVICE_WP6003]
+    device = BLEDevice(address, name, details={})
+    adv = AdvertisementData(
+        local_name=name,
         manufacturer_data={},
         service_data={},
-        service_uuids=service_uuids or [SERVICE_WP6003],
-        source="local",
-        device=MagicMock(),
-        advertisement=MagicMock(),
-        time=0.0,
-        connectable=True,
+        service_uuids=uuids,
+        rssi=-60,
+        tx_power=0,
+        platform_data=(),
+    )
+    return BluetoothServiceInfoBleak.from_device_and_advertisement_data(
+        device, adv, "local", 0.0, True
     )
 
 
@@ -66,9 +69,11 @@ def test_parse_wp6003():
     parser._start_update(info)
 
     assert parser.title == "WP6003 EEFF"
-    assert parser._device_name == "WP6003 EEFF"
-    assert parser._device_type == "Air Quality Monitor"
-    assert parser._device_manufacturer == "Vson Technology CO., LTD"
+    assert parser.get_device_name() == "WP6003 EEFF"
+    dev_info = parser._get_device_info(None)
+    assert dev_info.name == "WP6003 EEFF"
+    assert dev_info.model == "Air Quality Monitor"
+    assert dev_info.manufacturer == "Vson Technology CO., LTD"
 
 
 @pytest.mark.asyncio
