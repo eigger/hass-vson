@@ -99,3 +99,19 @@ async def test_async_poll():
     # Verify predefined sensor descriptions
     assert TVOC__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER.native_unit_of_measurement == Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
     assert HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER.native_unit_of_measurement == Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+
+
+@pytest.mark.asyncio
+async def test_async_poll_none_data():
+    """Test async_poll gracefully handles None response from BLE connection."""
+    parser = VsonBluetoothDeviceData()
+    ble_device = MagicMock()
+
+    with patch(
+        "custom_components.vson.vson_ble.parser.get_sensor_data",
+        new=AsyncMock(return_value=None),
+    ):
+        update = await parser.async_poll(ble_device)
+
+    assert update is not None
+    assert len(update.entity_values) == 0
