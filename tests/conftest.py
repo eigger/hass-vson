@@ -15,6 +15,9 @@ class MockBase:
     def __init__(self, *args, **kwargs):
         pass
 
+    def __init_subclass__(cls, *args, **kwargs):
+        pass
+
     def __class_getitem__(cls, item):
         return cls
 
@@ -189,6 +192,7 @@ ha_const.Platform = Platform
 ha_const.ATTR_SW_VERSION = "sw_version"
 ha_const.ATTR_HW_VERSION = "hw_version"
 ha_const.CONF_ADDRESS = "address"
+ha_const.CONF_SCAN_INTERVAL = "scan_interval"
 ha_const.EntityCategory = EntityCategory
 ha_const.UnitOfDensity = UnitOfDensity
 ha_const.UnitOfRatio = UnitOfRatio
@@ -201,7 +205,25 @@ ha_core.HomeAssistant = MagicMock
 ha_core.callback = lambda f: f
 sys.modules["homeassistant.core"] = ha_core
 
-sys.modules["homeassistant.config_entries"] = MagicMock()
+
+class MockConfigFlow(MockBase):
+    pass
+
+
+class MockOptionsFlow(MockBase):
+    pass
+
+
+class MockConfigEntry(MockBase):
+    pass
+
+
+ha_config_entries = MagicMock()
+ha_config_entries.ConfigFlow = MockConfigFlow
+ha_config_entries.OptionsFlow = MockOptionsFlow
+ha_config_entries.ConfigEntry = MockConfigEntry
+ha_config_entries.ConfigFlowResult = dict
+sys.modules["homeassistant.config_entries"] = ha_config_entries
 sys.modules["homeassistant.helpers"] = MagicMock()
 sys.modules["homeassistant.helpers.device_registry"] = MagicMock()
 sys.modules["homeassistant.helpers.entity_platform"] = MagicMock()
