@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import cast
-from .vson_ble import SensorDeviceClass as VsonSensorDeviceClass, SensorUpdate, Units
+from .vson_ble import (
+    SensorDeviceClass as VsonSensorDeviceClass,
+    SensorDeviceInfo,
+    SensorUpdate,
+    Units,
+)
 
 from homeassistant.components.bluetooth.passive_update_processor import (
     PassiveBluetoothDataUpdate,
@@ -16,8 +22,11 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import (
-    ATTR_SW_VERSION,
     ATTR_HW_VERSION,
+    ATTR_MANUFACTURER,
+    ATTR_MODEL,
+    ATTR_NAME,
+    ATTR_SW_VERSION,
     EntityCategory,
     UnitOfDensity,
     UnitOfRatio,
@@ -26,7 +35,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.sensor import sensor_device_info_to_hass_device_info
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
@@ -78,12 +87,36 @@ SENSOR_DESCRIPTIONS = {
     ),
 }
 
-def hass_device_info(sensor_device_info):
-    device_info = sensor_device_info_to_hass_device_info(sensor_device_info)
-    if sensor_device_info.sw_version is not None:
-        device_info[ATTR_SW_VERSION] = sensor_device_info.sw_version
-    if sensor_device_info.hw_version is not None:
-        device_info[ATTR_HW_VERSION] = sensor_device_info.hw_version
+def hass_device_info(sensor_device_info: SensorDeviceInfo) -> DeviceInfo:
+    """Convert sensor device info, including its firmware and hardware versions."""
+    return _hass_device_info(
+        sensor_device_info.name,
+        sensor_device_info.manufacturer,
+        sensor_device_info.model,
+        sensor_device_info.sw_version,
+        sensor_device_info.hw_version,
+    )
+
+
+@lru_cache(maxsize=64)
+def _hass_device_info(
+    name: str | None,
+    manufacturer: str | None,
+    model: str | None,
+    sw_version: str | None,
+    hw_version: str | None,
+) -> DeviceInfo:
+    """Return a cached device info for the given values."""
+    device_info = DeviceInfo()
+    for key, value in (
+        (ATTR_NAME, name),
+        (ATTR_MANUFACTURER, manufacturer),
+        (ATTR_MODEL, model),
+        (ATTR_SW_VERSION, sw_version),
+        (ATTR_HW_VERSION, hw_version),
+    ):
+        if value is not None:
+            device_info[key] = value
     return device_info
 
 def sensor_update_to_bluetooth_data_update(
