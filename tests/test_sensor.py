@@ -12,10 +12,16 @@ from homeassistant.const import (
 )
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from custom_components.vson.binary_sensor import VsonConnectionBinarySensorEntity
-from custom_components.vson.vson_ble import SensorDeviceClass as VsonSensorDeviceClass, Units
+from custom_components.vson.vson_ble import (
+    SensorDeviceClass as VsonSensorDeviceClass,
+    SensorDeviceInfo,
+    Units,
+)
+from custom_components.vson import sensor as sensor_module
 from custom_components.vson.sensor import (
     SENSOR_DESCRIPTIONS,
     VsonPollDurationSensorEntity,
+    hass_device_info,
     sensor_update_to_bluetooth_data_update,
 )
 
@@ -74,6 +80,31 @@ def test_sensor_update_to_bluetooth_data_update_none():
     assert data_update is not None
     assert data_update.devices == {}
     assert data_update.entity_descriptions == {}
+
+
+def test_hass_device_info_is_cached_with_firmware_versions(monkeypatch):
+    """Device info values include versions and are cached by their values."""
+    monkeypatch.setattr(sensor_module, "DeviceInfo", dict)
+    sensor_module._hass_device_info.cache_clear()
+    sensor_device_info = SensorDeviceInfo(
+        name="Air Quality Monitor",
+        manufacturer="Vson",
+        model="WP6003",
+        sw_version="1.2",
+        hw_version="A1",
+    )
+
+    first = hass_device_info(sensor_device_info)
+    second = hass_device_info(sensor_device_info)
+
+    assert first is second
+    assert list(first.values()) == [
+        "Air Quality Monitor",
+        "Vson",
+        "WP6003",
+        "1.2",
+        "A1",
+    ]
 
 
 def test_connection_binary_sensor_entity():
