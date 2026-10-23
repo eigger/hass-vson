@@ -68,3 +68,7 @@ CI-01 .github/workflows/validate.yml: central standards composite action pinned 
 
 - Existing CI workflows are preserved, except hass-kocom-smarthome where matching reviewed central references are synchronized. Existing support minimum and prior exceptions remain.
 - Independent review and remote CI: tracked in this branch's pull request; merge requires resolved actionable findings and successful applicable checks. No real release upload, device or new real HA runtime validation is claimed by these local packaging checks.
+
+## Release 1.4.0 preparation
+
+Rebased on `069078005fdae393a03a28d351bd22625c8bf8d9`, preserving the 1.3.0 ZIP workflow, HACS ZIP selection, Downloads badges and historical adoption records. The user authorized PR creation, squash merge and a release with GitHub-generated notes. Both local HA environments passed all 36 tests again after rebase. PR #10 remote validation identified `iot_class: local_poll` as invalid; corrected to `local_polling` and reran CI before merge. Final remote results are available on [PR #10](https://github.com/eigger/hass-vson/pull/10).

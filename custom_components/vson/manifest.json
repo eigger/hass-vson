@@ -16,7 +16,7 @@
     "bluetooth"
   ],
   "documentation": "https://github.com/eigger/hass-vson",
-  "iot_class": "local_poll",
+  "iot_class": "local_polling",
   "issue_tracker": "https://github.com/eigger/hass-vson/issues",
   "loggers": [
     "blesession"
