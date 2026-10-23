@@ -11,6 +11,8 @@
 <!-- hass-standards:badges:end -->
 Vson BLE Sensor Home Assistant Integration
 
+**English** | [한국어](README.ko.md)
+
 ## 💬 Feedback & Support
 
 🐞 Found a bug? Let us know via an [Issue](https://github.com/eigger/hass-vson/issues).  
@@ -24,6 +26,14 @@ Vson BLE Sensor Home Assistant Integration
 repository into the `custom_components/vson` directory.
 2. Restart Home Assistant.
   
+## Bluetooth and diagnostics
+
+For remote connections, follow the [Bluetooth proxy setup guide](https://github.com/eigger/blesession/blob/main/docs/bluetooth.md). See [WP6003 troubleshooting](docs/troubleshooting.md) for power, competing connections, timing, failure stages and logging.
+
+Measurements are polled every 300 seconds by default; configure 30–86400 seconds in the integration options. Connections close after each poll. Diagnostics include Connection, Poll duration, Communication problem, Last error, Error count and Last failure. Failure details include stage, likely cause and available radio facts; history survives a successful subsequent poll and resets on entry reload/restart. The existing Connection and Poll duration entity IDs are preserved.
+
+This integration uses shared blesession transport, notification handling and reports. It requires Home Assistant 2025.1.0 or newer. Automated tests use real HA with simulated BLE transport; physical WP6003/local adapter/proxy validation is still needed.
+
 ## References
 - [WP6003-air-box (saso5)](https://github.com/saso5/saso5.github.io/tree/master/WP6003-air-box)
 - [xiaomi_ble](https://github.com/home-assistant/core/tree/dev/homeassistant/components/xiaomi_ble)

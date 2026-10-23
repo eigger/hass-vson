@@ -33,11 +33,23 @@
     "sensor": {
       "poll_duration": {
         "name": "Poll duration"
+      },
+      "last_error": {
+        "name": "Last error"
+      },
+      "error_count": {
+        "name": "Error count"
+      },
+      "last_failure": {
+        "name": "Last failure"
       }
     },
     "binary_sensor": {
       "connection": {
         "name": "Connection"
+      },
+      "problem": {
+        "name": "Communication problem"
       }
     }
   }

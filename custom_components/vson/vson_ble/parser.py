@@ -14,7 +14,9 @@ from sensor_state_data.description import (
     BaseSensorDescription,
 )
 from .const import SERVICE_WP6003
-from .writer import get_sensor_data
+from .writer import get_sensor_data, InvalidSensorResponse
+from blesession import SessionTrace
+from collections.abc import Callable
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,6 +28,8 @@ HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER = BaseSensorDescription(
     device_class=SensorDeviceClass.FORMALDEHYDE,
     native_unit_of_measurement=Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
 )
+
+
 class VsonBluetoothDeviceData(BluetoothData):
     """Data for BTHome Bluetooth devices."""
 
@@ -46,9 +50,7 @@ class VsonBluetoothDeviceData(BluetoothData):
                 self._parse_wp6003(service_info)
         return None
 
-    def _parse_wp6003(
-        self, service_info: BluetoothServiceInfoBleak
-    ) -> bool:
+    def _parse_wp6003(self, service_info: BluetoothServiceInfoBleak) -> bool:
         """Parser for Vson sensors"""
 
         model = "WP6003"
@@ -60,25 +62,43 @@ class VsonBluetoothDeviceData(BluetoothData):
         self.set_device_type("Air Quality Monitor")
         self.set_device_manufacturer(manufacturer)
         return True
-    
-    async def async_poll(self, ble_device: BLEDevice) -> SensorUpdate:
+
+    async def async_poll(
+        self,
+        ble_device: BLEDevice,
+        *,
+        trace: SessionTrace | None = None,
+        on_connection: Callable[[bool], None] | None = None,
+    ) -> SensorUpdate:
         """
         Poll the device to retrieve any values we can't get from passive listening.
         """
         self._events_updates.clear()
         self._sensor_values_updates.clear()
         self._sensor_descriptions_updates.clear()
-        data = await get_sensor_data(ble_device)
-        #0a0001010e02010908000065000f01000251
+        data = await get_sensor_data(
+            ble_device, trace=trace, on_connection=on_connection
+        )
+        if not data or len(data) != 18:
+            raise InvalidSensorResponse("WP6003 response must contain 18 bytes")
+        # 0a0001010e02010908000065000f01000251
         if data and len(data) == 18:
             temperature = ((data[6] << 8) + data[7]) / 10
             tvoc = ((data[10] << 8) + data[11]) / 1000
             hcho = ((data[12] << 8) + data[13]) / 1000
-            co2 = ((data[16] << 8) + data[17])
-            
-            self.update_predefined_sensor(SensorLibrary.TEMPERATURE__CELSIUS, round(temperature, 2))
-            self.update_predefined_sensor(TVOC__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER, round(tvoc, 2))
-            self.update_predefined_sensor(HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER, round(hcho, 2))
-            self.update_predefined_sensor(SensorLibrary.CO2__CONCENTRATION_PARTS_PER_MILLION, co2)
+            co2 = (data[16] << 8) + data[17]
+
+            self.update_predefined_sensor(
+                SensorLibrary.TEMPERATURE__CELSIUS, round(temperature, 2)
+            )
+            self.update_predefined_sensor(
+                TVOC__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER, round(tvoc, 2)
+            )
+            self.update_predefined_sensor(
+                HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER, round(hcho, 2)
+            )
+            self.update_predefined_sensor(
+                SensorLibrary.CO2__CONCENTRATION_PARTS_PER_MILLION, co2
+            )
 
         return self._finish_update()

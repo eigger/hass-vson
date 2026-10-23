@@ -1,3 +1,21 @@
+# Standards reference
+
+Reviewed standards SHA: `4fa557eaa7142b87a6cae8b09c249cf50c3865c6`
+
+Source: [eigger/hass-repo-standards](https://github.com/eigger/hass-repo-standards/tree/4fa557eaa7142b87a6cae8b09c249cf50c3865c6).
+
+This is a targeted application for blesession, diagnostic entities, shared HA test infrastructure, reusable test/validation workflows, and bilingual Bluetooth guidance. It is not a claim of full repository standards adoption. Existing HA minimum `2025.1.0`, sensor unique IDs are preserved; the release version is 1.4.0. No exceptions have been approved or invented.
+
+The implementation reuses blesession `0.9.0` for connection ownership, notifications, bounded writes/disconnects, attempt serialization, trace vocabulary, radio facts and retained session reports. WP6003 commands, packet parsing, timing policy and HA entities remain integration responsibilities. No new cross-repository library abstraction or edits to other integrations are needed for this change.
+
+Both reusable workflows are pinned to the reviewed standards SHA. The root HA test fixture and domain fixture guidance come from the central templates. Existing parser, sensor, import and config/options regressions were retained or converted to actual HA tests under `tests/components/vson/`; the fake `homeassistant.*` modules were removed.
+
+See [verification evidence](ADOPTION_CHECKLIST.md). Full metadata/category review, managed README/badge adoption, automated dependency maintenance, central adoption-status updates, remote CI and physical hardware validation are not claimed by this scoped change. The central status table was not modified because this task's changes are confined to hass-vson.
+
+## Earlier ZIP packaging adoption
+
+The previously adopted release workflow and its reviewed SHA remain unchanged. Historical record follows.
+
 # Scoped standards adoption
 
 - Reviewed standards SHA: `fd4162c0b93fbe8e109f99c787773ae09ba157e1`

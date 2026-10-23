@@ -1,107 +1,87 @@
-# vson_ble.py
+"""WP6003 commands over the shared BLE session and notification transport."""
 
 from __future__ import annotations
-import logging
-from typing import Any, Callable, TypeVar
-from asyncio import Event, wait_for, sleep
-from bleak import BleakClient, BleakError
+
+from collections.abc import Callable
+
 from bleak.backends.device import BLEDevice
-from bleak_retry_connector import establish_connection
-from .const import CHAR_CMD, CHAR_NOTI
+from blesession import (
+    DeviceError,
+    GattMismatch,
+    Notifications,
+    SessionTrace,
+    ble_session,
+    characteristic_or_raise,
+)
 
-_LOGGER = logging.getLogger(__name__)
+from .const import CHAR_CMD, CHAR_NOTI, SERVICE_WP6003
 
-# 예외 정의
-class BleakCharacteristicMissing(BleakError):
-    """Characteristic Missing"""
+NOTIFY_SETTLE_S = 0.5
+WRITE_PACE_S = 0.05
+REPLY_TIMEOUT_S = 5.0
 
-class BleakServiceMissing(BleakError):
-    """Service Missing"""
 
-WrapFuncType = TypeVar("WrapFuncType", bound=Callable[..., Any])
+class InvalidSensorResponse(DeviceError):
+    """The WP6003 returned a packet that cannot be parsed."""
 
-def disconnect_on_missing_services(func: WrapFuncType) -> WrapFuncType:
-    """Missing services"""
-    async def wrapper(self, *args, **kwargs):
-        try:
-            return await func(self, *args, **kwargs)
-        except (BleakServiceMissing, BleakCharacteristicMissing):
-            if self.client.is_connected:
-                await self.client.clear_cache()
-                await self.client.disconnect()
-            raise
-    return wrapper  # type: ignore
+    retryable = False
+
 
 async def get_sensor_data(
     ble_device: BLEDevice,
-) -> bytes | None:
-    client: BleakClient | None = None
+    *,
+    trace: SessionTrace | None = None,
+    on_connection: Callable[[bool], None] | None = None,
+) -> bytes:
+    """Read one measurement, preserving transport and protocol failures."""
+    trace = trace if trace is not None else SessionTrace()
+
+    def disconnected(_client: object) -> None:
+        if on_connection is not None:
+            on_connection(False)
+
     try:
-        _LOGGER.debug("connection: %s", ble_device)
-        client = await establish_connection(BleakClient, ble_device, ble_device.address)
-        services = client.services
-        for svc in services:
-            for c in svc.characteristics:
-                _LOGGER.debug(f"uuid: {svc.uuid}, char: {c}")
-
-        vson = VsonClient(client)
-        return await vson.request_data()
-    except Exception as e:
-        _LOGGER.error("Fail get data: %s", e, exc_info=True)
+        async with ble_session(
+            ble_device, trace=trace, name="WP6003", disconnected_callback=disconnected
+        ) as client:
+            if on_connection is not None:
+                on_connection(True)
+            with trace.timed("subscribe"):
+                characteristic_or_raise(
+                    client,
+                    SERVICE_WP6003,
+                    CHAR_NOTI,
+                    properties=("notify",),
+                    label="WP6003",
+                )
+                command = characteristic_or_raise(
+                    client,
+                    SERVICE_WP6003,
+                    CHAR_CMD,
+                    label="WP6003",
+                )
+                if not {"write", "write-without-response"}.intersection(
+                    command.properties
+                ):
+                    raise GattMismatch("WP6003 command characteristic is not writable")
+            async with Notifications(
+                client, CHAR_NOTI, settle=NOTIFY_SETTLE_S
+            ) as replies:
+                with trace.timed("readout"):
+                    data = await replies.request(
+                        CHAR_CMD,
+                        b"\xab",
+                        timeout=REPLY_TIMEOUT_S,
+                        step="readout",
+                        response=None,
+                        pace_s=WRITE_PACE_S,
+                    )
+                    if len(data) != 18:
+                        raise InvalidSensorResponse(
+                            f"WP6003 returned {len(data)} bytes; expected 18"
+                        )
+                    trace.note(payload_bytes=len(data))
+                    return data
     finally:
-        if client and client.is_connected:
-            await client.disconnect()
-    return None
-
-class VsonClient:
-       
-    def __init__(
-        self,
-        client: BleakClient
-    ) -> None:
-        self.client = client
-        self.event: Event = Event()
-        self.command_data: bytes | None = None
-
-    @disconnect_on_missing_services
-    async def start_notify(self) -> None:
-        await self.client.start_notify(CHAR_NOTI, self._notification_handler)
-        await sleep(0.5)
-
-    @disconnect_on_missing_services
-    async def stop_notify(self) -> None:
-        await self.client.stop_notify(CHAR_NOTI)
-
-    @disconnect_on_missing_services
-    async def write(self, uuid: str, data: bytes) -> None:
-        _LOGGER.debug("Write UUID=%s data=%s", uuid, len(data))
-        chunk = len(data)
-        for i in range(0, len(data), chunk):
-            await self.client.write_gatt_char(uuid, data[i : i + chunk])
-            await sleep(0.05)
-
-    def _notification_handler(self, _: Any, data: bytearray) -> None:
-        if self.command_data is None:
-            self.command_data = bytes(data)
-            self.event.set()
-
-    async def read(self, timeout: float = 5.0) -> bytes:
-        await wait_for(self.event.wait(), timeout)
-        data = self.command_data or b""
-        _LOGGER.debug("Received: %s", data.hex())
-        return data
-
-    async def write_with_response(self, uuid, packet: bytes) -> bytes:
-        self.command_data = None
-        self.event.clear()
-        await self.write(uuid, packet)
-        return await self.read()
-    
-    #0xAB get data
-    #0xAD calibration
-    async def request_data(self) -> bytes:
-        await self.start_notify()
-        data = await self.write_with_response(CHAR_CMD, bytes([0xAB]))
-        await self.stop_notify()
-        return data
-    
+        if on_connection is not None:
+            on_connection(False)

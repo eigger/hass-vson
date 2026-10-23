@@ -5,8 +5,6 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 import pytest
 from homeassistant.const import (
-    UnitOfDensity,
-    UnitOfRatio,
     UnitOfTemperature,
     UnitOfTime,
 )
@@ -29,24 +27,38 @@ from custom_components.vson.sensor import (
 def test_sensor_descriptions_units():
     """Verify SENSOR_DESCRIPTIONS has correct UnitOfDensity and UnitOfRatio."""
     # CO2
-    co2_desc = SENSOR_DESCRIPTIONS[(VsonSensorDeviceClass.CO2, Units.CONCENTRATION_PARTS_PER_MILLION)]
-    assert co2_desc.native_unit_of_measurement == UnitOfRatio.PARTS_PER_MILLION
+    co2_desc = SENSOR_DESCRIPTIONS[
+        (VsonSensorDeviceClass.CO2, Units.CONCENTRATION_PARTS_PER_MILLION)
+    ]
+    assert co2_desc.native_unit_of_measurement == "ppm"
     assert co2_desc.device_class == SensorDeviceClass.CO2
     assert co2_desc.state_class == SensorStateClass.MEASUREMENT
 
     # Temperature
-    temp_desc = SENSOR_DESCRIPTIONS[(VsonSensorDeviceClass.TEMPERATURE, Units.TEMP_CELSIUS)]
+    temp_desc = SENSOR_DESCRIPTIONS[
+        (VsonSensorDeviceClass.TEMPERATURE, Units.TEMP_CELSIUS)
+    ]
     assert temp_desc.native_unit_of_measurement == UnitOfTemperature.CELSIUS
     assert temp_desc.device_class == SensorDeviceClass.TEMPERATURE
 
     # VOC
-    voc_desc = SENSOR_DESCRIPTIONS[(VsonSensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS, Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER)]
-    assert voc_desc.native_unit_of_measurement == UnitOfDensity.MICROGRAMS_PER_CUBIC_METER
+    voc_desc = SENSOR_DESCRIPTIONS[
+        (
+            VsonSensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+            Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        )
+    ]
+    assert voc_desc.native_unit_of_measurement == "µg/m³"
     assert voc_desc.device_class == SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
 
     # Formaldehyde (HCHO)
-    hcho_desc = SENSOR_DESCRIPTIONS[(VsonSensorDeviceClass.FORMALDEHYDE, Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER)]
-    assert hcho_desc.native_unit_of_measurement == UnitOfDensity.MICROGRAMS_PER_CUBIC_METER
+    hcho_desc = SENSOR_DESCRIPTIONS[
+        (
+            VsonSensorDeviceClass.FORMALDEHYDE,
+            Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        )
+    ]
+    assert hcho_desc.native_unit_of_measurement == "µg/m³"
     assert hcho_desc.device_class == SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
 
 
@@ -84,7 +96,6 @@ def test_sensor_update_to_bluetooth_data_update_none():
 
 def test_hass_device_info_is_cached_with_firmware_versions(monkeypatch):
     """Device info values include versions and are cached by their values."""
-    monkeypatch.setattr(sensor_module, "DeviceInfo", dict)
     sensor_module._hass_device_info.cache_clear()
     sensor_device_info = SensorDeviceInfo(
         name="Air Quality Monitor",
@@ -135,7 +146,7 @@ async def test_ble_telemetry_lifecycle():
     }
 
     async with vson_poll_ble_telemetry(entry_data):
-        conn_coord.async_set_updated_data.assert_called_with(True)
+        conn_coord.async_set_updated_data.assert_not_called()
         dur_coord.async_set_updated_data.assert_called_with(0.0)
 
     # After exit, connection should be False and duration should have been finalized
@@ -143,5 +154,3 @@ async def test_ble_telemetry_lifecycle():
     last_dur = dur_coord.async_set_updated_data.call_args_list[-1][0][0]
     assert isinstance(last_dur, float)
     assert last_dur >= 0.0
-
-
