@@ -1,0 +1,10 @@
+{
+  "repository": "eigger/hass-vson",
+  "default_branch": "master",
+  "domain": "vson",
+  "hacs": "custom",
+  "release": true,
+  "readmes": [
+    "README.md"
+  ]
+}
