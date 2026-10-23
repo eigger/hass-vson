@@ -5,12 +5,13 @@ from __future__ import annotations
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from bleak.backends.device import BLEDevice
+from blesession.testing import FakeDevice
 from bleak.backends.scanner import AdvertisementData
 from home_assistant_bluetooth import BluetoothServiceInfoBleak
 from sensor_state_data import Units
 
 from custom_components.vson.vson_ble.const import SERVICE_WP6003
+from custom_components.vson.vson_ble.writer import InvalidSensorResponse
 from custom_components.vson.vson_ble.parser import (
     HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     TVOC__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
@@ -25,7 +26,7 @@ def _make_service_info(
 ) -> BluetoothServiceInfoBleak:
     """Helper to create a BluetoothServiceInfoBleak instance."""
     uuids = service_uuids if service_uuids is not None else [SERVICE_WP6003]
-    device = BLEDevice(address, name, details={})
+    device = FakeDevice(address, name)
     adv = AdvertisementData(
         local_name=name,
         manufacturer_data={},
@@ -53,7 +54,9 @@ def test_supported():
     assert parser.supported(wrong_name_info) is False
 
     # Missing service UUID
-    wrong_uuid_info = _make_service_info("6003#1234", service_uuids=["00001800-0000-1000-8000-00805f9b34fb"])
+    wrong_uuid_info = _make_service_info(
+        "6003#1234", service_uuids=["00001800-0000-1000-8000-00805f9b34fb"]
+    )
     assert parser.supported(wrong_uuid_info) is False
 
     # Empty name
@@ -97,8 +100,14 @@ async def test_async_poll():
 
     assert update is not None
     # Verify predefined sensor descriptions
-    assert TVOC__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER.native_unit_of_measurement == Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
-    assert HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER.native_unit_of_measurement == Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+    assert (
+        TVOC__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER.native_unit_of_measurement
+        == Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+    )
+    assert (
+        HCHO__CONCENTRATION_MICROGRAMS_PER_CUBIC_METER.native_unit_of_measurement
+        == Units.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+    )
 
 
 @pytest.mark.asyncio
@@ -111,7 +120,5 @@ async def test_async_poll_none_data():
         "custom_components.vson.vson_ble.parser.get_sensor_data",
         new=AsyncMock(return_value=None),
     ):
-        update = await parser.async_poll(ble_device)
-
-    assert update is not None
-    assert len(update.entity_values) == 0
+        with pytest.raises(InvalidSensorResponse):
+            await parser.async_poll(ble_device)

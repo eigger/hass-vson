@@ -2,41 +2,36 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
 from functools import partial
 import logging
-from .vson_ble import VsonBluetoothDeviceData, SensorUpdate
+
+from blesession import SessionReports
 from homeassistant.components.bluetooth import (
     BluetoothScanningMode,
     BluetoothServiceInfoBleak,
-    async_ble_device_from_address,
 )
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import device_registry as dr
-from homeassistant.helpers.device_registry import DeviceRegistry
-from datetime import timedelta
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from .ble_session import vson_poll_ble_telemetry
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
+from .ble_session import VsonBleSession
 from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .coordinator import VsonPassiveBluetoothProcessorCoordinator
 from .types import VsonConfigEntry
+from .vson_ble import SensorUpdate, VsonBluetoothDeviceData
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
 _LOGGER = logging.getLogger(__name__)
 
+
 def process_service_info(
-    hass: HomeAssistant,
     entry: VsonConfigEntry,
-    device_registry: DeviceRegistry,
     service_info: BluetoothServiceInfoBleak,
 ) -> SensorUpdate:
-    """Process a BluetoothServiceInfoBleak, running side effects and returning sensor data."""
-    coordinator = entry.runtime_data
-    data = coordinator.device_data
-    update = data.update(service_info)
-
-    return update
+    """Update device metadata from passive advertisements."""
+    return entry.runtime_data.device_data.update(service_info)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool:
@@ -48,16 +43,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
 
     data = VsonBluetoothDeviceData()
     hass.data[DOMAIN][entry.entry_id] = {}
-    hass.data[DOMAIN][entry.entry_id]['address'] = address
-    hass.data[DOMAIN][entry.entry_id]['data'] = data
+    hass.data[DOMAIN][entry.entry_id]["address"] = address
+    hass.data[DOMAIN][entry.entry_id]["data"] = data
 
-    device_registry = dr.async_get(hass)
     bt_coordinator = VsonPassiveBluetoothProcessorCoordinator(
         hass,
         _LOGGER,
         address=address,
         mode=BluetoothScanningMode.PASSIVE,
-        update_method=partial(process_service_info, hass, entry, device_registry),
+        update_method=partial(process_service_info, entry),
         device_data=data,
         connectable=True,
         entry=entry,
@@ -78,18 +72,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
     hass.data[DOMAIN][entry.entry_id]["connection_coordinator"] = connection_coordinator
     hass.data[DOMAIN][entry.entry_id]["duration_coordinator"] = duration_coordinator
 
-    async def _async_poll_data(hass: HomeAssistant, entry: VsonConfigEntry) -> SensorUpdate:
-        entry_data = hass.data[DOMAIN][entry.entry_id]
-        async with vson_poll_ble_telemetry(entry_data):
-            device = async_ble_device_from_address(hass, entry_data["address"])
-            if not device:
-                raise UpdateFailed("BLE Device not found")
-            coordinator: VsonPassiveBluetoothProcessorCoordinator = entry.runtime_data
-            update = await coordinator.device_data.async_poll(device)
-            if not update or not update.entity_values:
-                raise UpdateFailed("No sensor data received from BLE device")
-            coordinator.async_set_updated_data(update)
-            return update
+    reports_coordinator = DataUpdateCoordinator[SessionReports](
+        hass,
+        _LOGGER,
+        name=f"{DOMAIN}_reports_{address}",
+    )
+    entry_data = hass.data[DOMAIN][entry.entry_id]
+    entry_data["reports_coordinator"] = reports_coordinator
+    session = VsonBleSession(hass, address, data, entry_data)
+    reports_coordinator.async_set_updated_data(session.reports)
+    entry_data["session"] = session
+    entry.async_on_unload(session.async_shutdown)
+
+    async def _async_poll_data() -> SensorUpdate:
+        update = await session.async_poll()
+        bt_coordinator.async_publish_poll(update)
+        return update
 
     scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     poll_coordinator = DataUpdateCoordinator[SensorUpdate](
@@ -97,10 +95,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
         _LOGGER,
         config_entry=entry,
         name=DOMAIN,
-        update_method=partial(_async_poll_data, hass, entry),
+        update_method=_async_poll_data,
         update_interval=timedelta(seconds=scan_interval),
     )
-    
+
     entry.runtime_data = bt_coordinator
     entry.runtime_data.poll_coordinator = poll_coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -109,7 +107,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool
     entry.async_on_unload(bt_coordinator.async_start())
 
     # Keep a listener registered on poll_coordinator so DataUpdateCoordinator schedules periodic refreshes
-    entry.async_on_unload(poll_coordinator.async_add_listener(lambda: None))
+    entry.async_on_unload(
+        poll_coordinator.async_add_listener(bt_coordinator.async_update_poll_status)
+    )
 
     # Reload entry when options change
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
@@ -127,7 +127,9 @@ async def async_reload_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> Non
 
 async def async_unload_entry(hass: HomeAssistant, entry: VsonConfigEntry) -> bool:
     """Unload a config entry."""
+    entry_data = hass.data[DOMAIN][entry.entry_id]
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
+        await entry_data["session"].async_shutdown()
         hass.data[DOMAIN].pop(entry.entry_id, None)
     return unload_ok

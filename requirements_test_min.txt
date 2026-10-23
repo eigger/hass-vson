@@ -1,0 +1,3 @@
+# Existing HACS baseline, kept separate from the current HA environment.
+homeassistant==2025.1.0
+pytest-homeassistant-custom-component==0.13.201
