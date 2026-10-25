@@ -33,5 +33,10 @@
     ],
     "integration_type": null,
     "source": "README Supported Models identifies WP6003; custom_components/vson/sensor.py exposes CO2, VOC and formaldehyde measurements with auxiliary temperature. Category names verified against official Core taxonomy ec18d8b25d1ee39aa8b85a72a170e42bee33228c."
+  },
+  "standards": {
+    "kind": "release",
+    "tag": "v1.0.0",
+    "resolved_sha": "44349ee5621eea5d80e5c427f7a2435d2c2491bb"
   }
 }
