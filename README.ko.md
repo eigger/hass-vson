@@ -1,17 +1,32 @@
+<!-- hass-standards:header:start -->
 # hass-vson
-Vson BLE 센서 Home Assistant 통합
+
+Vson WP6003 Bluetooth 공기질 센서를 위한 Home Assistant HACS 커스텀 통합입니다.
 
 [English](README.md) | **한국어**
 
-## 💬 피드백 및 지원
+<!-- hass-standards:badges:start -->
+[![Release](https://img.shields.io/github/v/release/eigger/hass-vson?style=flat)](https://github.com/eigger/hass-vson/releases)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5?style=flat)](#설치)
+[![Home Assistant minimum](https://img.shields.io/badge/HA-%E2%89%A5%202025.1.0-41BDF5?style=flat)](hacs.json)
+[![Tests](https://img.shields.io/github/actions/workflow/status/eigger/hass-vson/tests.yml?branch=master&style=flat&label=Tests)](https://github.com/eigger/hass-vson/actions/workflows/tests.yml)
+[![Validate](https://img.shields.io/github/actions/workflow/status/eigger/hass-vson/validate.yml?branch=master&style=flat&label=Validate)](https://github.com/eigger/hass-vson/actions/workflows/validate.yml)
+[![License](https://img.shields.io/github/license/eigger/hass-vson?style=flat)](LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/eigger/hass-vson/total?style=flat&color=41BDF5&label=Downloads)](https://github.com/eigger/hass-vson/releases)
+<!-- hass-standards:badges:end -->
+<!-- hass-standards:header:end -->
 
-🐞 버그는 [Issue](https://github.com/eigger/hass-vson/issues)로 알려주세요.
-💡 질문과 제안은 [Discussion](https://github.com/eigger/hass-vson/discussions)을 이용하세요.
+Vson BLE 센서 Home Assistant 통합
+
 
 ## 지원 모델
 - WP6003
 
 ## 설치
+
+<!-- hass-standards:installation:start -->
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=eigger&repository=hass-vson&category=integration)
+<!-- hass-standards:installation:end -->
 1. HACS에 이 저장소를 추가하여 설치하거나 이 저장소의 통합 파일을 `custom_components/vson` 디렉터리로 복사하세요.
 2. Home Assistant를 재시작하세요.
 
@@ -27,3 +42,19 @@ Vson BLE 센서 Home Assistant 통합
 - [WP6003-air-box (saso5)](https://github.com/saso5/saso5.github.io/tree/master/WP6003-air-box)
 - [xiaomi_ble](https://github.com/home-assistant/core/tree/dev/homeassistant/components/xiaomi_ble)
 - [xiaomi-ble](https://github.com/Bluetooth-Devices/xiaomi-ble.git)
+
+<!-- hass-standards:support:start -->
+## 지원
+
+- [Issues](https://github.com/eigger/hass-vson/issues): 버그를 신고하거나 기능을 요청하세요.
+- [Discussions](https://github.com/eigger/hass-vson/discussions): 질문하고 사용 경험을 공유하세요.
+<!-- hass-standards:support:end -->
+
+<!-- hass-standards:related-projects:start -->
+<!-- hass-standards:related-projects:end -->
+
+<!-- hass-standards:license:start -->
+## 라이선스
+
+[MIT License](LICENSE) 라이선스로 배포됩니다.
+<!-- hass-standards:license:end -->

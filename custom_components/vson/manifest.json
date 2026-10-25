@@ -8,6 +8,9 @@
       "connectable": true
     }
   ],
+  "categories": [
+    "sensors.air_quality"
+  ],
   "codeowners": [
     "@eigger"
   ],
