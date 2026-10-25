@@ -1,11 +1,12 @@
 name: Validate
 'on':
   push:
-    branches: [main, master]
-  pull_request:
+    branches:
+    - master
+  pull_request: null
+  workflow_dispatch: null
   schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+  - cron: 23 3 * * 1
 permissions:
   contents: read
 concurrency:
@@ -13,4 +14,16 @@ concurrency:
   cancel-in-progress: true
 jobs:
   validate:
-    uses: eigger/hass-repo-standards/.github/workflows/validate-integration.yml@4fa557eaa7142b87a6cae8b09c249cf50c3865c6
+    uses: eigger/hass-repo-standards/.github/workflows/validate-integration.yml@1863343638014adb8a4001afc8fddc1a27dc500f
+  standards:
+    name: Central template compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      with:
+        python-version: '3.14'
+    - uses: eigger/hass-repo-standards/actions/check-standards@1863343638014adb8a4001afc8fddc1a27dc500f

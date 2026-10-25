@@ -72,3 +72,22 @@ CI-01 .github/workflows/validate.yml: central standards composite action pinned 
 ## Release 1.4.0 preparation
 
 Rebased on `069078005fdae393a03a28d351bd22625c8bf8d9`, preserving the 1.3.0 ZIP workflow, HACS ZIP selection, Downloads badges and historical adoption records. The user authorized PR creation, squash merge and a release with GitHub-generated notes. Both local HA environments passed all 36 tests again after rebase. PR #10 remote validation identified `iot_class: local_poll` as invalid; corrected to `local_polling` and reran CI before merge. Final remote results are available on [PR #10](https://github.com/eigger/hass-vson/pull/10).
+
+
+## 2026-10-25 중앙 검사기 부분 갱신 검증
+
+- 검토한 중앙 SHA: `1863343638014adb8a4001afc8fddc1a27dc500f`; 적용 시작 커밋: `9ed5c63609b5ed72f9af1c0c82991d1529375ef1`.
+- 범위: 중앙 pin·standards-ref·검토 기준 기록 정합화 및 누락 standards job 추가. HA 구현·요구 버전은 유지합니다.
+- 로컬: Python 3.14.5 / PyYAML 6.0.3, `python scripts/check_integration.py <target>` (검토한 중앙 source에서 실행): FAIL — 아래 미충족 항목을 확인했으며 성공으로 표시하지 않음.
+- actionlint: PASS. PR CI·독립 리뷰 결과는 PR 링크와 check 결과를 확인합니다. 이 로컬 결과만으로 전체 채택 완료를 주장하지 않습니다.
+- 수정 전에도 최신 검사기로 검사 시 10개 진단이 있었습니다. 이번 검사기가 드러내는 잔여 항목은 다음과 같습니다. 승인 예외나 실패 무시를 추가하지 않았습니다.
+
+```text
+DOC-01 .hass-standards.json: readmes must be [README.md, README.ko.md]
+HA-02 custom_components/vson/manifest.json: categories requires 1–3 actual product categories (HA-02 project policy)
+TEST-08 tests/components/vson/test_binary_sensor.py: Required contract file is missing
+HA-13 custom_components/__init__.py: Required contract file is missing
+HA-11 custom_components/vson/translations/ko.json: Unresolved Core translation reference
+HA-11 custom_components/vson/translations/en.json: English deployment translations must match strings.json source
+```
+- 독립 리뷰: 별도 review_checker_rollout 담당자가 19개 리포의 workflow 69개·기존 job 100개를 구조 비교했습니다. 새 CI 회귀 지적 없음. 기존 job ID·입력·권한·지원 최소와 통합 코드 보존 및 새 standards job의 중앙 템플릿 일치 확인. 실행 변경 없는 이 기록 추가 전 작업 트리를 검토했습니다.
