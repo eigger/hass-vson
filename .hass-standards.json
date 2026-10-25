@@ -5,6 +5,33 @@
   "hacs": "custom",
   "release": true,
   "readmes": [
-    "README.md"
-  ]
+    "README.md",
+    "README.ko.md"
+  ],
+  "readme": {
+    "title": "hass-vson",
+    "descriptions": {
+      "en": "A Home Assistant custom integration for Vson WP6003 Bluetooth air quality sensors.",
+      "ko": "Vson WP6003 Bluetooth 공기질 센서를 위한 Home Assistant HACS 커스텀 통합입니다."
+    },
+    "issues": true,
+    "discussions": true,
+    "license_name": "MIT License",
+    "license_notices": {
+      "en": [],
+      "ko": []
+    },
+    "related_projects": []
+  },
+  "installation_links": {
+    "README.md": "#installation",
+    "README.ko.md": "#설치"
+  },
+  "categories_review": {
+    "value": [
+      "sensors.air_quality"
+    ],
+    "integration_type": null,
+    "source": "README Supported Models identifies WP6003; custom_components/vson/sensor.py exposes CO2, VOC and formaldehyde measurements with auxiliary temperature. Category names verified against official Core taxonomy ec18d8b25d1ee39aa8b85a72a170e42bee33228c."
+  }
 }

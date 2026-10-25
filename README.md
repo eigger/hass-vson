@@ -1,4 +1,9 @@
+<!-- hass-standards:header:start -->
 # hass-vson
+
+A Home Assistant custom integration for Vson WP6003 Bluetooth air quality sensors.
+
+**English** | [한국어](README.ko.md)
 
 <!-- hass-standards:badges:start -->
 [![Release](https://img.shields.io/github/v/release/eigger/hass-vson?style=flat)](https://github.com/eigger/hass-vson/releases)
@@ -9,19 +14,19 @@
 [![License](https://img.shields.io/github/license/eigger/hass-vson?style=flat)](LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/eigger/hass-vson/total?style=flat&color=41BDF5&label=Downloads)](https://github.com/eigger/hass-vson/releases)
 <!-- hass-standards:badges:end -->
+<!-- hass-standards:header:end -->
+
 Vson BLE Sensor Home Assistant Integration
 
-**English** | [한국어](README.ko.md)
-
-## 💬 Feedback & Support
-
-🐞 Found a bug? Let us know via an [Issue](https://github.com/eigger/hass-vson/issues).  
-💡 Have a question or suggestion? Join the [Discussion](https://github.com/eigger/hass-vson/discussions)!
 
 ## Supported Models
 - WP6003
 
 ## Installation
+
+<!-- hass-standards:installation:start -->
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=eigger&repository=hass-vson&category=integration)
+<!-- hass-standards:installation:end -->
 1. Install this integration with HACS (adding repository required), or copy the contents of this
 repository into the `custom_components/vson` directory.
 2. Restart Home Assistant.
@@ -38,3 +43,19 @@ This integration uses shared blesession transport, notification handling and rep
 - [WP6003-air-box (saso5)](https://github.com/saso5/saso5.github.io/tree/master/WP6003-air-box)
 - [xiaomi_ble](https://github.com/home-assistant/core/tree/dev/homeassistant/components/xiaomi_ble)
 - [xiaomi-ble](https://github.com/Bluetooth-Devices/xiaomi-ble.git)
+
+<!-- hass-standards:support:start -->
+## Support
+
+- [Issues](https://github.com/eigger/hass-vson/issues): Report bugs or request features.
+- [Discussions](https://github.com/eigger/hass-vson/discussions): Ask questions and share your experience.
+<!-- hass-standards:support:end -->
+
+<!-- hass-standards:related-projects:start -->
+<!-- hass-standards:related-projects:end -->
+
+<!-- hass-standards:license:start -->
+## License
+
+Released under the [MIT License](LICENSE).
+<!-- hass-standards:license:end -->
