@@ -12,9 +12,8 @@ concurrency:
   cancel-in-progress: true
 jobs:
   current:
-    uses: eigger/hass-repo-standards/.github/workflows/python-tests.yml@v1.0.1
+    uses: eigger/hass-repo-standards/.github/workflows/python-tests.yml@v1.1.1
     with:
-      standards-ref: c9b4553184f9c27bdbe7bf8564eaf10153e9575b
       domain: vson
       python-versions: '["3.14"]'
       requirements: requirements_test.txt
@@ -23,9 +22,8 @@ jobs:
       test-profile: ha
       pytest-args: tests/components/vson/ -v
   minimum-ha:
-    uses: eigger/hass-repo-standards/.github/workflows/python-tests.yml@v1.0.1
+    uses: eigger/hass-repo-standards/.github/workflows/python-tests.yml@v1.1.1
     with:
-      standards-ref: c9b4553184f9c27bdbe7bf8564eaf10153e9575b
       domain: vson
       python-versions: '["3.13"]'
       requirements: requirements_test_min.txt
