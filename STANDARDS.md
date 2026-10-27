@@ -1,9 +1,9 @@
 # 적용한 공통 규칙
 
-- 표준: https://github.com/eigger/hass-repo-standards/tree/v1.1.2
-- 참조 커밋 SHA: df9798509d9228247ec32efb313ec7b687b5b152
-- Standards release: v1.1.2
-- Resolved standards SHA: df9798509d9228247ec32efb313ec7b687b5b152
+- 표준: https://github.com/eigger/hass-repo-standards/tree/v1.1.3
+- 참조 커밋 SHA: c8c2771a2de68769af40f56e19e958e374e6e091
+- Standards release: v1.1.3
+- Resolved standards SHA: c8c2771a2de68769af40f56e19e958e374e6e091
 
 This is a targeted application for blesession, diagnostic entities, shared HA test infrastructure, reusable test/validation workflows, and bilingual Bluetooth guidance. It is not a claim of full repository standards adoption. Existing HA minimum `2025.1.0`, sensor unique IDs are preserved; the release version is 1.4.0. No exceptions have been approved or invented.
 
