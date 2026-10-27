@@ -17,7 +17,6 @@ jobs:
       domain: vson
       python-versions: '["3.14"]'
       requirements: requirements_test.txt
-      expected-ha-version: '2026.10.2'
       ha-components: bluetooth usb
       test-profile: ha
       pytest-args: tests/components/vson/ -v
