@@ -12,7 +12,7 @@ A Home Assistant custom integration for Vson WP6003 Bluetooth air quality sensor
 [![Tests](https://img.shields.io/github/actions/workflow/status/eigger/hass-vson/tests.yml?branch=master&style=flat&label=Tests)](https://github.com/eigger/hass-vson/actions/workflows/tests.yml)
 [![Validate](https://img.shields.io/github/actions/workflow/status/eigger/hass-vson/validate.yml?branch=master&style=flat&label=Validate)](https://github.com/eigger/hass-vson/actions/workflows/validate.yml)
 [![License](https://img.shields.io/github/license/eigger/hass-vson?style=flat)](LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/eigger/hass-vson/total?style=flat&color=41BDF5&label=Downloads)](https://github.com/eigger/hass-vson/releases)
+[![Downloads](https://img.shields.io/github/downloads/eigger/hass-vson/latest/total?style=flat&color=41BDF5&label=Downloads)](https://github.com/eigger/hass-vson/releases)
 <!-- hass-standards:badges:end -->
 <!-- hass-standards:header:end -->
 
