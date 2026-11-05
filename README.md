@@ -1,5 +1,5 @@
 <!-- hass-standards:header:start -->
-# hass-vson
+# Vson BLE for Home Assistant
 
 A Home Assistant custom integration for Vson WP6003 Bluetooth air quality sensors.
 
@@ -16,30 +16,41 @@ A Home Assistant custom integration for Vson WP6003 Bluetooth air quality sensor
 <!-- hass-standards:badges:end -->
 <!-- hass-standards:header:end -->
 
-Vson BLE Sensor Home Assistant Integration
+<a name="supported-models"></a>
 
-
-## Supported Models
+## Supported devices
 - WP6003
+
+## Requirements
+
+- **Home Assistant:** 2025.1.0 or later.
+- **Bluetooth:** A connectable Bluetooth adapter or proxy.
+- **Device:** Vson WP6003.
 
 ## Installation
 
 <!-- hass-standards:installation:start -->
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=eigger&repository=hass-vson&category=integration)
 <!-- hass-standards:installation:end -->
-1. Install this integration with HACS (adding repository required), or copy the contents of this
-repository into the `custom_components/vson` directory.
-2. Restart Home Assistant.
-  
+
+1. Click the badge above to open the repository in Marketplace.
+2. If you need to add it yourself, go to **Settings → Marketplace → Add from link** and enter <https://github.com/eigger/hass-vson>. Connect GitHub if prompted.
+3. Select **Install**. Restart Home Assistant if prompted, then continue to [Configuration](#configuration).
+
+## Configuration
+
+Under **Settings → Devices & services**, confirm discovery or choose **Add integration → Vson** and select the sensor.
+
 ## Bluetooth and diagnostics
 
 For remote connections, follow the [Bluetooth proxy setup guide](https://github.com/eigger/blesession/blob/main/docs/bluetooth.md). See [WP6003 troubleshooting](docs/troubleshooting.md) for power, competing connections, timing, failure stages and logging.
 
 Measurements are polled every 300 seconds by default; configure 30–86400 seconds in the integration options. Connections close after each poll. Diagnostics include Connection, Poll duration, Communication problem, Last error, Error count and Last failure. Failure details include stage, likely cause and available radio facts; history survives a successful subsequent poll and resets on entry reload/restart. The existing Connection and Poll duration entity IDs are preserved.
 
-This integration uses shared blesession transport, notification handling and reports. It requires Home Assistant 2025.1.0 or newer. Automated tests use real HA with simulated BLE transport; physical WP6003/local adapter/proxy validation is still needed.
+This integration uses shared blesession transport, notification handling and reports. Automated tests use real HA with simulated BLE transport; physical WP6003/local adapter/proxy validation is still needed.
 
 ## References
+
 - [WP6003-air-box (saso5)](https://github.com/saso5/saso5.github.io/tree/master/WP6003-air-box)
 - [xiaomi_ble](https://github.com/home-assistant/core/tree/dev/homeassistant/components/xiaomi_ble)
 - [xiaomi-ble](https://github.com/Bluetooth-Devices/xiaomi-ble.git)
