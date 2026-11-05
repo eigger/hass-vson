@@ -9,10 +9,10 @@
     "README.ko.md"
   ],
   "readme": {
-    "title": "hass-vson",
+    "title": "Vson BLE for Home Assistant",
     "descriptions": {
       "en": "A Home Assistant custom integration for Vson WP6003 Bluetooth air quality sensors.",
-      "ko": "Vson WP6003 Bluetooth 공기질 센서를 위한 Home Assistant HACS 커스텀 통합입니다."
+      "ko": "Vson WP6003 Bluetooth 공기질 센서를 위한 Home Assistant 커스텀 통합입니다."
     },
     "issues": true,
     "discussions": true,
