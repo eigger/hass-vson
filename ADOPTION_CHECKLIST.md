@@ -10,7 +10,7 @@ The plan was to preserve WP6003 frames/timing, existing measurement and diagnost
 | --- | --- |
 | Actual HA 2025.1.0 / Python 3.13.14 / pytest-homeassistant-custom-component 0.13.201 | PASS: 36 tests |
 | Actual HA 2026.10.2 / Python 3.14.5 / pytest-homeassistant-custom-component 0.13.373 | PASS: 36 tests |
-| blesession exact declared version | 0.9.0 installed in both environments; exact pin is both minimum and selected version |
+| blesession declared lower bound | `>=0.9.0`; 0.9.0 installed in both environments (minimum verified at the lower bound) |
 | Bluetooth sensor data dependency | 1.7.1 installed in both environments; compatible with minimum HA's component pins |
 | Dependency consistency | PASS: `uv pip check` in both environments |
 | Ruff 0.17.2 lint and formatting | PASS |

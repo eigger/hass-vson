@@ -7,7 +7,7 @@
 
 This is a targeted application for blesession, diagnostic entities, shared HA test infrastructure, reusable test/validation workflows, and bilingual Bluetooth guidance. It is not a claim of full repository standards adoption. Existing HA minimum `2025.1.0`, sensor unique IDs are preserved; the release version is 1.4.0. No exceptions have been approved or invented.
 
-The implementation reuses blesession `0.9.0` for connection ownership, notifications, bounded writes/disconnects, attempt serialization, trace vocabulary, radio facts and retained session reports. WP6003 commands, packet parsing, timing policy and HA entities remain integration responsibilities. No new cross-repository library abstraction or edits to other integrations are needed for this change.
+The implementation reuses blesession (declared `>=0.9.0`, verified at `0.9.0`) for connection ownership, notifications, bounded writes/disconnects, attempt serialization, trace vocabulary, radio facts and retained session reports. WP6003 commands, packet parsing, timing policy and HA entities remain integration responsibilities. No new cross-repository library abstraction or edits to other integrations are needed for this change.
 
 Both reusable workflows are pinned to the reviewed standards SHA. The root HA test fixture and domain fixture guidance come from the central templates. Existing parser, sensor, import and config/options regressions were retained or converted to actual HA tests under `tests/components/vson/`; the fake `homeassistant.*` modules were removed.
 
