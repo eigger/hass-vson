@@ -1,0 +1,20 @@
+name: Update dependencies
+on:
+  schedule:
+    - cron: '41 4 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  dependencies:
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: eigger/hass-repo-standards/.github/workflows/dependency-update.yml@v1.2.0 # reviewed shared standards release
+    with:
+      domain: vson
+      packages: '["blesession"]'
+      python-version: '3.14'
+      test-profile: ha
+      ha-components: bluetooth usb
+      validation-command: python -m ruff check . && python -m ruff format --check . && python -m pytest tests/components/vson/ -v --timeout 120
