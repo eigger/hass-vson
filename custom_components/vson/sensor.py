@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from blesession import SessionReports
-from typing import cast
+from typing import Any, cast
 from .vson_ble import (
     SensorDeviceClass as VsonSensorDeviceClass,
     SensorDeviceInfo,
@@ -23,11 +23,6 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import (
-    ATTR_HW_VERSION,
-    ATTR_MANUFACTURER,
-    ATTR_MODEL,
-    ATTR_NAME,
-    ATTR_SW_VERSION,
     EntityCategory,
     UnitOfTemperature,
     UnitOfTime,
@@ -107,17 +102,16 @@ def _hass_device_info(
     hw_version: str | None,
 ) -> DeviceInfo:
     """Return a cached device info for the given values."""
-    device_info = DeviceInfo()
-    for key, value in (
-        (ATTR_NAME, name),
-        (ATTR_MANUFACTURER, manufacturer),
-        (ATTR_MODEL, model),
-        (ATTR_SW_VERSION, sw_version),
-        (ATTR_HW_VERSION, hw_version),
-    ):
-        if value is not None:
-            device_info[key] = value
-    return device_info
+    # Keyword construction only: DeviceInfo is a TypedDict before HA 2026.11 and
+    # a dataclass after it, so unset fields must be omitted (never passed as None).
+    fields: dict[str, Any] = {
+        "name": name,
+        "manufacturer": manufacturer,
+        "model": model,
+        "sw_version": sw_version,
+        "hw_version": hw_version,
+    }
+    return DeviceInfo(**{k: v for k, v in fields.items() if v is not None})
 
 
 def sensor_update_to_bluetooth_data_update(

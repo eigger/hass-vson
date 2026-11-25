@@ -9,6 +9,7 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
+from homeassistant.helpers.device_registry import DeviceInfo
 from custom_components.vson.binary_sensor import VsonConnectionBinarySensorEntity
 from custom_components.vson.vson_ble import (
     SensorDeviceClass as VsonSensorDeviceClass,
@@ -109,13 +110,13 @@ def test_hass_device_info_is_cached_with_firmware_versions(monkeypatch):
     second = hass_device_info(sensor_device_info)
 
     assert first is second
-    assert list(first.values()) == [
-        "Air Quality Monitor",
-        "Vson",
-        "WP6003",
-        "1.2",
-        "A1",
-    ]
+    assert first == DeviceInfo(
+        name="Air Quality Monitor",
+        manufacturer="Vson",
+        model="WP6003",
+        sw_version="1.2",
+        hw_version="A1",
+    )
 
 
 def test_connection_binary_sensor_entity():
